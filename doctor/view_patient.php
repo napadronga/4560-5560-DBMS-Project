@@ -47,9 +47,15 @@ $result = $conn->query($sql);
                     <td><?php echo $row['date_of_birth']; ?></td>
                     <td><?php echo $row['email']; ?></td>
                     <td>
-                        <!-- not functional yet -- doctor specific action buttons -->
-                        <button>Add Visit</button>
-                        <button>Generate Report</button>
+                        <!-- doctor actions with patient_id -->
+                        <form action="add_visit.php" method="get" style="display:inline;">
+                            <input type="hidden" name="patient_id" value="<?php echo (int)$row['patient_id']; ?>">
+                            <button type="submit">Add Visit</button>
+                        </form>
+                        <form action="generate_report.php" method="get" style="display:inline; margin-left:6px;">
+                            <input type="hidden" name="patient_id" value="<?php echo (int)$row['patient_id']; ?>">
+                            <button type="submit">Generate Report</button>
+                        </form>
                     </td>
                 </tr>
             <?php endwhile; ?>

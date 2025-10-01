@@ -26,7 +26,6 @@ CREATE TABLE PREEXISTING_MEDICAL_HISTORY (
     conditions TEXT,
     allergies TEXT,
     family_history TEXT,
-    medications TEXT,
     surgeries TEXT,
     social_history TEXT,
     activity_level TEXT,
@@ -85,6 +84,18 @@ CREATE TABLE RETURNED_VISIT_DATA (
     FOREIGN KEY (doctor_id) REFERENCES DOCTOR_INFO(doctor_id)
 );
 
+-- PATIENT_MEDICATIONS table for storing medications -- works better with 'edit info' functionality vs having to update medication text
+CREATE TABLE PATIENT_MEDICATIONS (
+    med_id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    medication_name VARCHAR(100) NOT NULL,
+    start_date DATE,
+    end_date DATE,
+    dosage VARCHAR(50),
+    FOREIGN KEY (patient_id) REFERENCES PATIENT_INFO(patient_id)
+);
+
+
 -- sample patient data
 INSERT INTO PATIENT_INFO (first_name, last_name, date_of_birth, gender, phone_number, email, address, emergency_contact_name, emergency_contact_number, marital_status, ethnicity)
 VALUES
@@ -94,10 +105,10 @@ VALUES
 
 -- sample preexisting medical data
 INSERT INTO PREEXISTING_MEDICAL_HISTORY 
-(patient_id, conditions, allergies, family_history, medications, surgeries, social_history, activity_level, serious_illnesses, serious_injuries, other_info, last_time_updated)
+(patient_id, conditions, allergies, family_history, surgeries, social_history, activity_level, serious_illnesses, serious_injuries, other_info, last_time_updated)
 VALUES
-(1, NULL, NULL, NULL, 'Tylenol', NULL, 'non-smoker, occasional alcohol', 'Moderate', 'None', NULL, NULL, NOW()),
-(2, 'Diabetes', NULL, 'Heart disease', 'Linisopril', NULL, ' heavy alcohol use', 'Active', NULL, 'Fractured collarbone (2016)', NULL, NOW());
+(1, NULL, NULL, NULL, NULL, 'non-smoker, occasional alcohol', 'Moderate', 'None', NULL, NULL, NOW()),
+(2, 'Diabetes', NULL, 'Heart disease', NULL, ' heavy alcohol use', 'Active', NULL, 'Fractured collarbone (2016)', NULL, NOW());
 
 -- sample doctor, logins
 INSERT INTO DOCTOR_INFO (first_name, last_name, email, patients_handled_this_year, upcoming_patients)
@@ -115,3 +126,9 @@ INSERT INTO RETURNED_VISIT_DATA (visit_id, patient_id, doctor_id, visit_date, he
 VALUES
 (1, 1, 1, '2025-06-10', 160.0, 100.5, '120/80', 72, '2026-02-15', 37.2, 'Tylenol', 16, 'None', 'Normal', 'Normal', 'Normal', 'No', 'Patient is not sleeping well'),
 (2, 2, 1, '2025-07-10', 180.0, 140.0, '130/85', 78, '2026-03-20', 36.9, 'Lisinopril', 18, 'None', 'Normal', 'Normal', 'Normal', 'No', 'Patient is losing weight');
+
+-- sample medication data
+INSERT INTO PATIENT_MEDICATIONS (patient_id, medication_name, start_date, dosage)
+VALUES
+(1, 'Tylenol', '2025-01-01', '500mg daily'),
+(2, 'Lisinopril', '2023-12-25', '10mg daily');
