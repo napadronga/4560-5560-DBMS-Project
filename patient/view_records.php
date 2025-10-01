@@ -31,7 +31,7 @@ $history = $history_result->fetch_assoc();
         <h2>Personal Information</h2>
         <p><strong>Full Name:</strong> <?php echo htmlspecialchars($patient['first_name']." ".$patient['last_name']); ?></p>
         <p><strong>DOB:</strong> <?php echo htmlspecialchars($patient['date_of_birth']); ?></p>
-        <p><strong>Email:</strong> <?php echo htmlspecialchars($patient['email']); ?></p>
+        <p><strong>Email:</strong> <?php echo htmlspecialchars($patient['contact_email']); ?></p>
 
         <!-- non functional button --> 
         <button>Edit Info</button>
