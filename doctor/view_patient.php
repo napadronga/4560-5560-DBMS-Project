@@ -12,9 +12,9 @@ $search = $_GET['search'] ?? '';
 
 //prepares query for patients through either first name, last name, dob, or email
 //uses 'LIKE' for similar matches and limits to 10 results, for now
-$sql = "SELECT patient_id, first_name, last_name, date_of_birth, email 
+$sql = "SELECT patient_id, first_name, last_name, date_of_birth, contact_email 
         FROM PATIENT_INFO
-        WHERE first_name LIKE '%$search%' OR last_name LIKE '%$search%' OR email LIKE '%$search%'
+        WHERE first_name LIKE '%$search%' OR last_name LIKE '%$search%' OR contact_email LIKE '%$search%'
         LIMIT 10";
 
 //executing query        
@@ -45,7 +45,7 @@ $result = $conn->query($sql);
                     <td><?php echo $row['patient_id']; ?></td>
                     <td><?php echo $row['first_name']." ".$row['last_name']; ?></td>
                     <td><?php echo $row['date_of_birth']; ?></td>
-                    <td><?php echo $row['email']; ?></td>
+                    <td><?php echo $row['contact_email']; ?></td>
                     <td>
                         <!-- not functional yet -- doctor specific action buttons -->
                         <button>Add Visit</button>
