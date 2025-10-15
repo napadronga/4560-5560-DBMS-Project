@@ -145,16 +145,75 @@ VALUES
 
 INSERT INTO PATIENT_USERS (patient_id, login_email, password_hash)
 VALUES
-('1', 'jon1@gmail.com', 'jon1'),
-('2', 'jon2@gmail.com', 'jon2'),
-('3', 'jon3@gmail.com', 'jon3');
+(1, 'nat@example.com', '$2y$10$R5PT5z/dx4ZcjXhpnU18q.KleKbhHcqlwsuRvNUMaaQdmmD7/pecO'), -- boogers
+(2, 'bob@example.com', '$2y$10$cTIVwBRrIRZF5tJ3tRqqn.sS0iZ6NUNMdoE4Wieh9ziAP/LKjw62a'), -- stars  
+(3, 'rodgerdodger@example.com', '$2y$10$SzKBFOhKIo9kJPwYmejhSe14tmp3H3Ab2Cw4CisHAwnr0G7M34VIi'); -- jonjonjon
 
 INSERT INTO DOCTOR_USERS (doctor_id, login_email, password_hash)
 VALUES
-('1', 'djon1@gmail.com', 'djon1');
+(1, 'g@hospital.com', '$2y$10$eXWnh0znAG0i7xSQrxR0kuvEbYUwZlnygTMF.IxiOnayRJ.RkU0XO'); -- doctor123
 
 -- sample medication data
 INSERT INTO PATIENT_MEDICATIONS (patient_id, medication_name, start_date, dosage)
 VALUES
 (1, 'Tylenol', '2025-01-01', '500mg daily'),
 (2, 'Lisinopril', '2023-12-25', '10mg daily');
+
+-- PROCEDURES table for procedure prices
+CREATE TABLE PROCEDURES (
+    procedure_id INT AUTO_INCREMENT PRIMARY KEY,
+    procedure_name VARCHAR(100) NOT NULL,
+    description TEXT,
+    base_price DECIMAL(10,2) NOT NULL
+);
+
+-- BILLING table
+CREATE TABLE BILLING (
+    bill_id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    doctor_id INT NOT NULL,
+    visit_id INT,
+    procedure_id INT NOT NULL,
+    charge_amount DECIMAL(10,2) NOT NULL,
+    bill_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('Unpaid', 'Paid', 'Pending Insurance') DEFAULT 'Unpaid',
+    FOREIGN KEY (patient_id) REFERENCES PATIENT_INFO(patient_id),
+    FOREIGN KEY (doctor_id) REFERENCES DOCTOR_INFO(doctor_id),
+    FOREIGN KEY (visit_id) REFERENCES HOSPITAL_VISITS(visit_id),
+    FOREIGN KEY (procedure_id) REFERENCES PROCEDURES(procedure_id)
+);
+
+-- PAYMENTS table for storing payment records
+CREATE TABLE PAYMENTS (
+    payment_id INT AUTO_INCREMENT PRIMARY KEY,
+    bill_id INT NOT NULL,
+    patient_id INT NOT NULL,
+    payment_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    amount_paid DECIMAL(10,2) NOT NULL,
+    method ENUM('Credit Card', 'Cash', 'Insurance', 'Other') DEFAULT 'Other',
+    FOREIGN KEY (bill_id) REFERENCES BILLING(bill_id),
+    FOREIGN KEY (patient_id) REFERENCES PATIENT_INFO(patient_id)
+);
+
+-- sample procedures
+INSERT INTO PROCEDURES (procedure_name, description, base_price)
+VALUES
+('Consultation', 'General doctor consultation', 100.00),
+('Blood Test', 'Basic blood panel', 50.00),
+
+INSERT INTO BILLING (patient_id, doctor_id, visit_id, procedure_id, charge_amount, status)
+VALUES
+
+-- nat sample (consultation)
+(1, 1, 1, 1, 100.00, 'Unpaid'),
+
+-- bob sample (blood test and consultation)
+(2, 1, 2, 1, 100.00, 'Paid'),
+(2, 1, 2, 2, 50.00, 'Paid'),
+
+-- sample payment records
+INSERT INTO PAYMENTS (bill_id, patient_id, amount_paid, method)
+VALUES
+(3, 2, 100.00, 'Cash'),
+(4, 2, 50.00, 'Insurance');
+

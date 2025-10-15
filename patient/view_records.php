@@ -26,64 +26,80 @@ $medications = $medications_result->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Health Records</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="records-container">
-        <h1>Welcome back, <?php echo htmlspecialchars($patient['first_name']); ?>!</h1>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>Welcome back, <?php echo htmlspecialchars($patient['first_name']); ?>!</h1>
+        </div>
 
-        <!-- displaying the basic patient info -->
-        <h2>Personal Information</h2>
-        <p><strong>Full Name:</strong> <?php echo htmlspecialchars($patient['first_name']." ".$patient['last_name']); ?></p>
-        <p><strong>DOB:</strong> <?php echo htmlspecialchars($patient['date_of_birth']); ?></p>
-        <p><strong>Email:</strong> <?php echo htmlspecialchars($patient['contact_email']); ?></p>
+        <div class="dashboard-grid">
+            <!-- Personal Information Card -->
+            <div class="dashboard-card">
+                <h3>Personal Information</h3>
+                <p><strong>Full Name:</strong> <?php echo htmlspecialchars($patient['first_name']." ".$patient['last_name']); ?></p>
+                <p><strong>Date of Birth:</strong> <?php echo htmlspecialchars($patient['date_of_birth']); ?></p>
+                <p><strong>Email:</strong> <?php echo htmlspecialchars($patient['contact_email']); ?></p>
+                <form action="edit_record.php" method="get" style="margin-top: 1rem;">
+                    <button type="submit">Update Information</button>
+                </form>
+            </div>
 
-        <!-- edit info button -->
-        <form action="edit_record.php" method="get" style="display:inline;">
-            <button type="submit">Edit Info</button>
-        </form>
+            <!-- Medical History Card -->
+            <div class="dashboard-card">
+                <h3>Medical History</h3>
+                <?php if($history): ?>
+                    <p><strong>Conditions:</strong> 
+                        <?php echo !empty($history['conditions']) ? htmlspecialchars($history['conditions']) : "No conditions recorded"; ?>
+                    </p>
+                    <p><strong>Allergies:</strong> 
+                        <?php echo !empty($history['allergies']) ? htmlspecialchars($history['allergies']) : "No allergies recorded"; ?>
+                    </p>
+                    <p><strong>Last Updated:</strong> 
+                        <?php echo !empty($history['last_time_updated']) ? htmlspecialchars($history['last_time_updated']) : "Not updated yet"; ?>
+                    </p>
+                <?php else: ?>
+                    <p>No medical history available. Please update your information.</p>
+                <?php endif; ?>
+            </div>
 
-        <!-- displaying medical history -->
-        <h2>Medical History & Prescriptions</h2>
-        <?php if($history): ?>
-            <p><strong>Conditions:</strong> 
-                <?php echo !empty($history['conditions']) ? htmlspecialchars($history['conditions']) : "No conditions recorded"; ?>
-            </p>
-            <p><strong>Allergies:</strong> 
-                <?php echo !empty($history['allergies']) ? htmlspecialchars($history['allergies']) : "No allergies recorded"; ?>
-            </p>
-            <p><strong>Medications / Prescriptions</strong>
-            <?php if (!empty($medications)): ?>
-                <ul>
-                    <?php foreach ($medications as $med): ?>
-                        <li>
-                            <?php echo htmlspecialchars($med['medication_name']); ?>
-                            (<?php echo htmlspecialchars($med['dosage']); ?>)
-                            — Started: <?php echo htmlspecialchars($med['start_date']); ?>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-            <?php else: ?>
-                <p>No medications or prescriptions recorded</p>
-            <?php endif; ?>
-            <p><strong>Last Updated:</strong> 
-                <?php echo !empty($history['last_time_updated']) ? htmlspecialchars($history['last_time_updated']) : "Not updated yet"; ?>
-            </p>
-        <?php else: ?>
-            <!-- case where no medical history is available for patient -->
-            <p>No medical history available. Please update your info.</p>
-        <?php endif; ?>
+            <!-- Medications Card -->
+            <div class="dashboard-card">
+                <h3>Current Medications</h3>
+                <?php if (!empty($medications)): ?>
+                    <ul style="list-style: none; padding: 0;">
+                        <?php foreach ($medications as $med): ?>
+                            <li style="background: rgba(37, 99, 235, 0.05); padding: 0.75rem; margin: 0.5rem 0; border-radius: 8px; border-left: 4px solid var(--primary-color);">
+                                <strong><?php echo htmlspecialchars($med['medication_name']); ?></strong><br>
+                                <small><?php echo htmlspecialchars($med['dosage']); ?></small><br>
+                                <small style="color: var(--text-secondary);">Started: <?php echo htmlspecialchars($med['start_date']); ?></small>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php else: ?>
+                    <p>No medications or prescriptions recorded</p>
+                <?php endif; ?>
+            </div>
 
-        <!-- view data button -->
-        <form action="download_data.php" method="get" style="display:inline;">
-            <button type="submit">View Data</button>
-        </form>
-
-        <br><br>
-        <a href="../logout.php">Logout</a>
+            <!-- Actions Card -->
+            <div class="dashboard-card">
+                <h3>Quick Actions</h3>
+                <p>Manage your health data and records</p>
+                <form action="download_data.php" method="get" style="margin: 1rem 0;">
+                    <button type="submit">Download My Data</button>
+                </form>
+                <a href="../logout.php" style="display: inline-block; margin-top: 1rem; color: var(--text-secondary); text-decoration: none;">Sign Out</a>
+            </div>
+        </div>
     </div>
 </body>
 </html>

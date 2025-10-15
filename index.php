@@ -60,37 +60,45 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Health Records Portal</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Portal</title>
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- login form container -->
     <div class="login-container">
         <h1>Health Records Portal</h1>
+        <p>Secure access to your medical records</p>
         
         <!-- login form -->
         <form method="POST" class="login-form">
             <div class="form-row">
-                <label>Email:</label>
-                <input type="text" name="email" required>
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required placeholder="Enter your email">
             </div>
             <div class="form-row">
-                <label>Password:</label>
-                <input type="password" name="password" required>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required placeholder="Enter your password">
             </div>
-            <button type="submit">Login</button>
+            <button type="submit">Sign In</button>
         </form>
 
-	    <!-- register link -->
-        <p>Don’t have an account?</p>
+        <!-- register link -->
+        <p>Don't have an account?</p>
         <a href="register.php">
-	        <button>Register Here</button>
-	    </a>
+            <button>Create Account</button>
+        </a>
 
         <!-- displaying error if login fails -->
-        <p style="color:red;"><?php echo $error; ?></p>
+        <?php if (!empty($error)): ?>
+            <div class="error-message"><?php echo htmlspecialchars($error); ?></div>
+        <?php endif; ?>
     </div>
 </body>
 </html>

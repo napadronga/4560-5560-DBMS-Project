@@ -49,81 +49,177 @@ $medications = $mstmt->get_result();
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Report</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="records-container">
-        <h1>Patient Report</h1>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>Patient Medical Report</h1>
+        </div>
+
         <?php if (!$patient): ?>
-            <p>patient not found</p>
+            <div class="dashboard-card">
+                <h3>Patient Not Found</h3>
+                <p>The requested patient record could not be found.</p>
+            </div>
         <?php else: ?>
-            <h2>Personal Information</h2>
-            <p><strong>Name:</strong> <?php echo htmlspecialchars($patient['first_name'].' '.$patient['last_name']); ?></p>
-            <p><strong>DOB:</strong> <?php echo htmlspecialchars($patient['date_of_birth']); ?></p>
-            <p><strong>Email:</strong> <?php echo htmlspecialchars($patient['email'] ?? ''); ?></p>
-            <p><strong>Phone:</strong> <?php echo htmlspecialchars($patient['phone_number'] ?? ''); ?></p>
-            <p><strong>Address:</strong> <?php echo htmlspecialchars($patient['address'] ?? ''); ?></p>
+            <div class="dashboard-grid">
+                <!-- Personal Information Card -->
+                <div class="dashboard-card">
+                    <h3>Personal Information</h3>
+                    <div class="table-card-row">
+                        <div class="table-card-label">Name:</div>
+                        <div class="table-card-value"><?php echo htmlspecialchars($patient['first_name'].' '.$patient['last_name']); ?></div>
+                    </div>
+                    <div class="table-card-row">
+                        <div class="table-card-label">Date of Birth:</div>
+                        <div class="table-card-value"><?php echo htmlspecialchars($patient['date_of_birth']); ?></div>
+                    </div>
+                    <div class="table-card-row">
+                        <div class="table-card-label">Email:</div>
+                        <div class="table-card-value"><?php echo htmlspecialchars($patient['contact_email'] ?? 'Not provided'); ?></div>
+                    </div>
+                    <div class="table-card-row">
+                        <div class="table-card-label">Phone:</div>
+                        <div class="table-card-value"><?php echo htmlspecialchars($patient['phone_number'] ?? 'Not provided'); ?></div>
+                    </div>
+                    <div class="table-card-row">
+                        <div class="table-card-label">Address:</div>
+                        <div class="table-card-value"><?php echo htmlspecialchars($patient['address'] ?? 'Not provided'); ?></div>
+                    </div>
+                </div>
 
-            <h2>Preexisting Medical History</h2>
-            <?php if ($history): ?>
-                <p><strong>Conditions:</strong> <?php echo htmlspecialchars($history['conditions'] ?? ''); ?></p>
-                <p><strong>Allergies:</strong> <?php echo htmlspecialchars($history['allergies'] ?? ''); ?></p>
-                <p><strong>Current Medications</strong></p>
-                <?php if ($medications->num_rows > 0): ?>
-                    <ul>
-                        <?php while ($med = $medications->fetch_assoc()): ?>
-                            <li><?php echo htmlspecialchars($med['medication_name'] . " (" . $med['dosage'] . ")"); ?></li>
-                        <?php endwhile; ?>
-                    </ul>
-                <?php else: ?>
-                    <p>no medications recorded</p>
-                <?php endif; ?>
-                <p><strong>Surgeries:</strong> <?php echo htmlspecialchars($history['surgeries'] ?? ''); ?></p>
-                <p><strong>Family History:</strong> <?php echo htmlspecialchars($history['family_history'] ?? ''); ?></p>
-                <p><strong>Social History:</strong> <?php echo htmlspecialchars($history['social_history'] ?? ''); ?></p>
-                <p><strong>Activity Level:</strong> <?php echo htmlspecialchars($history['activity_level'] ?? ''); ?></p>
-                <p><strong>Last Updated:</strong> <?php echo htmlspecialchars($history['last_time_updated'] ?? ''); ?></p>
-            <?php else: ?>
-                <p>no preexisting history recorded</p>
-            <?php endif; ?>
+                <!-- Medical History Card -->
+                <div class="dashboard-card">
+                    <h3>Medical History</h3>
+                    <?php if ($history): ?>
+                        <div class="table-card-row">
+                            <div class="table-card-label">Conditions:</div>
+                            <div class="table-card-value"><?php echo htmlspecialchars($history['conditions'] ?? 'None recorded'); ?></div>
+                        </div>
+                        <div class="table-card-row">
+                            <div class="table-card-label">Allergies:</div>
+                            <div class="table-card-value"><?php echo htmlspecialchars($history['allergies'] ?? 'None recorded'); ?></div>
+                        </div>
+                        <div class="table-card-row">
+                            <div class="table-card-label">Surgeries:</div>
+                            <div class="table-card-value"><?php echo htmlspecialchars($history['surgeries'] ?? 'None recorded'); ?></div>
+                        </div>
+                        <div class="table-card-row">
+                            <div class="table-card-label">Family History:</div>
+                            <div class="table-card-value"><?php echo htmlspecialchars($history['family_history'] ?? 'None recorded'); ?></div>
+                        </div>
+                        <div class="table-card-row">
+                            <div class="table-card-label">Social History:</div>
+                            <div class="table-card-value"><?php echo htmlspecialchars($history['social_history'] ?? 'None recorded'); ?></div>
+                        </div>
+                        <div class="table-card-row">
+                            <div class="table-card-label">Activity Level:</div>
+                            <div class="table-card-value"><?php echo htmlspecialchars($history['activity_level'] ?? 'Not specified'); ?></div>
+                        </div>
+                        <div class="table-card-row">
+                            <div class="table-card-label">Last Updated:</div>
+                            <div class="table-card-value"><?php echo htmlspecialchars($history['last_time_updated'] ?? 'Never'); ?></div>
+                        </div>
+                    <?php else: ?>
+                        <p>No medical history recorded</p>
+                    <?php endif; ?>
+                </div>
 
-            <h2>Visits</h2>
-            <?php if ($visits->num_rows === 0): ?>
-                <p>no visits recorded</p>
-            <?php else: ?>
-                <table>
-                    <tr>
-                        <th>Date</th>
-                        <th>Reason</th>
-                        <th>Diagnosis</th>
-                        <th>Vitals</th>
-                        <th>Notes</th>
-                    </tr>
-                    <?php while ($v = $visits->fetch_assoc()): 
-                        $rvd = $rvd_by_visit[$v['visit_id']] ?? null; ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($v['visit_date']); ?></td>
-                            <td><?php echo htmlspecialchars($v['visit_reason'] ?? ''); ?></td>
-                            <td><?php echo htmlspecialchars($v['diagnosis'] ?? ''); ?></td>
-                            <td>
-                                <?php if ($rvd): ?>
-                                    <?php echo 'BP: '.htmlspecialchars($rvd['blood_pressure'] ?? '').', HR: '.htmlspecialchars($rvd['heart_rate'] ?? '').', Temp: '.htmlspecialchars($rvd['temperature'] ?? '').', RR: '.htmlspecialchars($rvd['respiration_rate'] ?? ''); ?>
-                                <?php else: ?>
-                                    n/a
-                                <?php endif; ?>
-                            </td>
-                            <td><?php echo htmlspecialchars($rvd['extra_notes'] ?? ''); ?></td>
-                        </tr>
-                    <?php endwhile; ?>
-                </table>
-            <?php endif; ?>
+                <!-- Current Medications Card -->
+                <div class="dashboard-card">
+                    <h3>Current Medications</h3>
+                    <?php if ($medications->num_rows > 0): ?>
+                        <div class="table-cards">
+                            <?php while ($med = $medications->fetch_assoc()): ?>
+                                <div class="table-card">
+                                    <div class="table-card-header"><?php echo htmlspecialchars($med['medication_name']); ?></div>
+                                    <div class="table-card-row">
+                                        <div class="table-card-label">Dosage:</div>
+                                        <div class="table-card-value"><?php echo htmlspecialchars($med['dosage']); ?></div>
+                                    </div>
+                                </div>
+                            <?php endwhile; ?>
+                        </div>
+                    <?php else: ?>
+                        <p>No medications recorded</p>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Visit History Card -->
+                <div class="dashboard-card" style="grid-column: 1 / -1;">
+                    <h3>Visit History</h3>
+                    <?php if ($visits->num_rows === 0): ?>
+                        <p>No visits recorded</p>
+                    <?php else: ?>
+                        <div class="table-cards">
+                            <?php while ($v = $visits->fetch_assoc()): 
+                                $rvd = $rvd_by_visit[$v['visit_id']] ?? null; ?>
+                                <div class="table-card">
+                                    <div class="table-card-header">
+                                        Visit on <?php echo htmlspecialchars($v['visit_date']); ?>
+                                    </div>
+                                    
+                                    <div class="table-card-row">
+                                        <div class="table-card-label">Reason:</div>
+                                        <div class="table-card-value"><?php echo htmlspecialchars($v['visit_reason'] ?? 'Not specified'); ?></div>
+                                    </div>
+                                    
+                                    <?php if (!empty($v['diagnosis'])): ?>
+                                    <div class="table-card-row">
+                                        <div class="table-card-label">Diagnosis:</div>
+                                        <div class="table-card-value"><?php echo htmlspecialchars($v['diagnosis']); ?></div>
+                                    </div>
+                                    <?php endif; ?>
+                                    
+                                    <?php if ($rvd): ?>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem; margin: 1rem 0; padding: 1rem; background: rgba(37, 99, 235, 0.05); border-radius: 8px;">
+                                        <div>
+                                            <div class="table-card-label">Blood Pressure</div>
+                                            <div class="table-card-value" style="font-weight: 600;"><?php echo htmlspecialchars($rvd['blood_pressure'] ?? 'N/A'); ?></div>
+                                        </div>
+                                        <div>
+                                            <div class="table-card-label">Heart Rate</div>
+                                            <div class="table-card-value" style="font-weight: 600;"><?php echo htmlspecialchars($rvd['heart_rate'] ?? 'N/A'); ?> bpm</div>
+                                        </div>
+                                        <div>
+                                            <div class="table-card-label">Temperature</div>
+                                            <div class="table-card-value" style="font-weight: 600;"><?php echo htmlspecialchars($rvd['temperature'] ?? 'N/A'); ?>°C</div>
+                                        </div>
+                                        <div>
+                                            <div class="table-card-label">Respiration</div>
+                                            <div class="table-card-value" style="font-weight: 600;"><?php echo htmlspecialchars($rvd['respiration_rate'] ?? 'N/A'); ?> rpm</div>
+                                        </div>
+                                    </div>
+                                    <?php endif; ?>
+                                    
+                                    <?php if (!empty($rvd['extra_notes'])): ?>
+                                    <div class="table-card-row">
+                                        <div class="table-card-label">Notes:</div>
+                                        <div class="table-card-value"><?php echo htmlspecialchars($rvd['extra_notes']); ?></div>
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endwhile; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
         <?php endif; ?>
 
-        <br>
-        <a href="view_patient.php">Back</a>
+        <div class="dashboard-card" style="text-align: center; margin-top: 2rem;">
+            <a href="view_patient.php">
+                <button style="background: var(--secondary-color);">Back to Dashboard</button>
+            </a>
+        </div>
     </div>
 </body>
 </html>
