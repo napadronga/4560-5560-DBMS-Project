@@ -76,12 +76,12 @@ $role = $_SESSION['role'] ?? null;
   <div class="lp-nav__inner">
     <div class="brand">Healthcare Portal</div>
     <div class="lp-links">
-      <a href="home.php">Home</a>
+      <a href="index.php">Home</a>
       <?php if ($isLoggedIn): ?>
         <a href="<?= $role==='doctor' ? 'doctor/view_records.php' : 'patient/view_records.php' ?>">Dashboard</a>
         <a href="logout.php">Logout</a>
       <?php else: ?>
-        <a href="index.php">Login</a>
+        <a href="login.php">Login</a>
         <a href="register.php">Create Account</a>
       <?php endif; ?>
     </div>
@@ -95,7 +95,7 @@ $role = $_SESSION['role'] ?? null;
     <p>Securely access visit summaries, manage profile details, and (for doctors) review patient records, all in one streamlined portal.</p>
     <div class="cta-row">
       <?php if (!$isLoggedIn): ?>
-        <a href="index.php">Login</a>
+        <a href="login.php">Login</a>
         <a href="register.php">Create Account</a>
       <?php else: ?>
         <a href="<?= $role==='doctor' ? 'doctor/view_records.php' : 'patient/view_records.php' ?>">Go to Dashboard</a>
@@ -165,6 +165,3 @@ $role = $_SESSION['role'] ?? null;
   <div class="lp-footer">© <?= date('Y') ?> Healthcare Portal</div>
 </body>
 </html>
-
-
-
