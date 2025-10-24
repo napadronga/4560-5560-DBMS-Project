@@ -151,7 +151,7 @@ $role = $_SESSION['role'] ?? null;
     <div style="margin-top:16px">
       <?php if (!$isLoggedIn): ?>
         <a class="btn" href="/healthcare/register.php">Create your account</a>
-        <a class="btn" href="/healthcare/index.php" style="margin-left:8px;background:#0f3a57;">I already have an account</a>
+        <a class="btn" href="/healthcare/login.php" style="margin-left:8px;background:#0f3a57;">I already have an account</a>
       <?php else: ?>
         
         <a class="btn" href="<?= $role==='doctor' ? '/healthcare/doctor/view_patient.php' : '/healthcare/patient/view_records.php' ?>">
