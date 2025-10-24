@@ -1,0 +1,104 @@
+<?php
+//start session
+session_start();
+
+//include the database connection
+include 'includes/db.php';
+
+//error messages stored here
+$error = "";
+
+//checks if login was submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    //getting email and password entered by the user
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+
+    //querying if the email exists in the patient table
+    $sql_patient = "SELECT patient_id, password_hash FROM PATIENT_USERS WHERE login_email='$email'";
+    $result_patient = $conn->query($sql_patient);
+
+    //querying if the email exists in the doctor table
+    $sql_doctor = "SELECT doctor_id, password_hash FROM DOCTOR_USERS WHERE login_email='$email'";
+    $result_doctor = $conn->query($sql_doctor);
+
+    //if user is in the patient table
+    if ($result_patient->num_rows > 0) {
+        $row = $result_patient->fetch_assoc();
+	    $patientHash = $row['password_hash'];
+	
+	    //verify password
+	    if (password_verify($password, $patientHash)) {
+            //storing patient id and role in session
+            $_SESSION['user_id'] = $row['patient_id'];
+            $_SESSION['role'] = "patient";
+
+            //redirecting to user's dash
+            header("Location: dashboard.php");
+            exit();
+        }
+    } 
+    //if user is in the doctor table
+    elseif ($result_doctor->num_rows > 0) {
+        $row = $result_doctor->fetch_assoc();
+	    $doctorHash = $row['password_hash'];
+
+	    //verify password
+	    if (password_verify($password, $doctorHash)) {
+            //storing doctor id and role in session
+            $_SESSION['user_id'] = $row['doctor_id'];
+            $_SESSION['role'] = "doctor";
+
+            //redirecting to the user's dash
+            header("Location: dashboard.php");
+            exit();
+        }
+    } 
+    //if no match was found in patient OR doctor
+    $error = "Invalid login";
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Portal</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- login form container -->
+    <div class="login-container">
+        <h1>Health Records Portal</h1>
+        <p>Secure access to your medical records</p>
+        
+        <!-- login form -->
+        <form method="POST" class="login-form">
+            <div class="form-row">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required placeholder="Enter your email">
+            </div>
+            <div class="form-row">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required placeholder="Enter your password">
+            </div>
+            <button type="submit">Sign In</button>
+        </form>
+
+        <!-- register link -->
+        <p>Don't have an account?</p>
+        <a href="register.php">
+            <button>Create Account</button>
+        </a>
+
+        <!-- displaying error if login fails -->
+        <?php if (!empty($error)): ?>
+            <div class="error-message"><?php echo htmlspecialchars($error); ?></div>
+        <?php endif; ?>
+    </div>
+</body>
+</html>
