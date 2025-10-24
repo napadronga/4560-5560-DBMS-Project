@@ -146,7 +146,7 @@ $role = $_SESSION['role'] ?? null;
    
   <section class="section">
     <div class="quote">
-      “I can find what I need in seconds. The new portal saves us time every day.” — Dr. Daniels
+      "I can find what I need in seconds. The new portal saves us time every day." — Dr. Daniels
     </div>
     <div style="margin-top:16px">
       <?php if (!$isLoggedIn): ?>

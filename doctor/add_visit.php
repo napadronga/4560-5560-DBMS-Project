@@ -112,7 +112,7 @@ if ($patient_id) {
                 </form>
             </div>
 
-            <!-- Navigation Card -->
+            <!-- Navigation card -->
             <div class="dashboard-card">
                 <h3>Navigation</h3>
                 <p>Return to the patient dashboard</p>

@@ -92,12 +92,8 @@ $visits = $stmt->get_result();
                         <h4>New Medications</h4>
                         <p><?php echo htmlspecialchars($v['new_medicines']); ?></p>
                         </div>
-                        <?php endif; ?>
-                        
+                        <?php endif; ?> 
                     </div>
-
-
-
                 <?php endwhile; ?>
             </div>
         <?php endif; ?>

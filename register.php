@@ -184,13 +184,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <button type="submit">Create Account</button>
         </form>
 
-        <!-- Back to login page -->
+        <!-- back to login page -->
         <p>Already have an account?</p>
         <a href="login.php">
             <button>Sign In</button>
         </a>
 
-        <!-- Display error -->
+        <!-- display error -->
         <?php if (!empty($error)): ?>
             <div class="error-message"><?php echo htmlspecialchars($error); ?></div>
         <?php endif; ?>
