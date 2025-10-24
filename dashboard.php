@@ -20,5 +20,9 @@ if ($_SESSION['role'] == "patient") {
     //redirect to doctor view and exit after
     header("Location: doctor/view_patient.php");
     exit();
+//if admin is logged in, redirect to admin dashboard
+} else if ($_SESSION['role'] == "admin") {
+    header("Location: admin/dashboard.php");
+    exit();
 }
 ?>

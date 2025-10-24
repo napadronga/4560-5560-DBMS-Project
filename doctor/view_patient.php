@@ -22,48 +22,75 @@ $result = $conn->query($sql);
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doctor Dashboard</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="records-container">
-        <h1>Doctor Dashboard</h1>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>Doctor Dashboard</h1>
+        </div>
         <!-- search form -->
-        <form method="GET">
-            <input type="text" name="search" placeholder="Search patients... " value="<?php echo htmlspecialchars($search); ?>">
-            <button type="submit">Search</button>
-        </form>
+        <div class="dashboard-card">
+            <h3>Search Patients</h3>
+            <form method="GET" class="search-form">
+                <div class="search-field">
+                    <label for="search">Search by name or email:</label>
+                    <input type="text" id="search" name="search" placeholder="Enter patient name or email..." value="<?php echo htmlspecialchars($search); ?>">
+                </div>
+   				 <button type="submit">Search</button>
+            </form>
+        </div>
 
-        <h2>Patients</h2>
-        <!-- table with retrieved patients' information -->
-        <table>
-            <tr><th>ID</th><th>Name</th><th>DOB</th><th>Email</th><th>Actions</th></tr>
-            <?php while ($row = $result->fetch_assoc()): ?>
-                <tr>
-                    <td><?php echo $row['patient_id']; ?></td>
-                    <td><?php echo $row['first_name']." ".$row['last_name']; ?></td>
-                    <td><?php echo $row['date_of_birth']; ?></td>
-                    <td><?php echo $row['contact_email']; ?></td>
-                    <td>
-                        <!-- doctor actions with patient_id -->
-                        <form action="add_visit.php" method="get" style="display:inline;">
-                            <input type="hidden" name="patient_id" value="<?php echo (int)$row['patient_id']; ?>">
-                            <button type="submit">Add Visit</button>
-                        </form>
-                        <form action="generate_report.php" method="get" style="display:inline; margin-left:6px;">
-                            <input type="hidden" name="patient_id" value="<?php echo (int)$row['patient_id']; ?>">
-                            <button type="submit">Generate Report</button>
-                        </form>
-                    </td>
-                </tr>
-            <?php endwhile; ?>
-        </table>
+        <div class="dashboard-card">
+            <h3>Patient Records</h3>
+            <?php if ($result->num_rows === 0): ?>
+                <p>No patients found.</p>
+            <?php else: ?>
+                <div class="table-cards">
+                    <?php while ($row = $result->fetch_assoc()): ?>
+                        <div class="table-card">
+                            <div class="table-card-header">
+                                <?php echo htmlspecialchars($row['first_name']." ".$row['last_name']); ?>
+                                <span style="font-size: 0.9rem; font-weight: 400; color: var(--text-secondary);">(ID: <?php echo $row['patient_id']; ?>)</span>
+                            </div>
+                            
+                            <div class="table-card-row">
+                                <div class="table-card-label">Date of Birth:</div>
+                                <div class="table-card-value"><?php echo htmlspecialchars($row['date_of_birth']); ?></div>
+                            </div>
+                            
+                            <div class="table-card-row">
+                                <div class="table-card-label">Email:</div>
+                                <div class="table-card-value"><?php echo htmlspecialchars($row['contact_email']); ?></div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                                <form action="add_visit.php" method="get" style="flex: 1;">
+                                    <input type="hidden" name="patient_id" value="<?php echo (int)$row['patient_id']; ?>">
+                                    <button type="submit" style="width: 100%;">Add Visit</button>
+                                </form>
+                                <form action="generate_report.php" method="get" style="flex: 1;">
+                                    <input type="hidden" name="patient_id" value="<?php echo (int)$row['patient_id']; ?>">
+                                    <button type="submit" style="width: 100%; background: var(--secondary-color);">Generate Report</button>
+                                </form>
+                            </div>
+                        </div>
+                    <?php endwhile; ?>
+                </div>
+            <?php endif; ?>
+        </div>
 
-        <!-- logout hyperlink -->
-        <p></p>
-        <a href="../logout.php">Logout</a>
+        <div class="dashboard-card" style="text-align: center;">
+            <a href="../logout.php" style="color: var(--text-secondary); text-decoration: none;">Sign Out</a>
+        </div>
     </div>
 </body>
 </html>

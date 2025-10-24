@@ -12,7 +12,7 @@ $patient_id = isset($_GET['patient_id']) ? (int)$_GET['patient_id'] : 0;
 $success = '';
 $error = '';
 
-// on submit, insert into HOSPITAL_VISITS
+// on 'submit' insert into HOSPITAL_VISITS
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $patient_id = (int)($_POST['patient_id'] ?? 0);
     $visit_date = trim($_POST['visit_date'] ?? '');
@@ -43,42 +43,84 @@ if ($patient_id) {
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Visit</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="records-container">
-        <h1>Add Visit</h1>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>Add New Visit</h1>
+            <p>Record a patient visit and diagnosis</p>
+        </div>
+
         <?php if (!empty($success)): ?>
-            <p style="color:green;"><?php echo htmlspecialchars($success); ?></p>
+            <div class="success-message"><?php echo htmlspecialchars($success); ?></div>
         <?php endif; ?>
         <?php if (!empty($error)): ?>
-            <p style="color:red;"><?php echo htmlspecialchars($error); ?></p>
+            <div class="error-message"><?php echo htmlspecialchars($error); ?></div>
         <?php endif; ?>
 
-        <?php if ($patient): ?>
-            <p><strong>Patient:</strong> <?php echo htmlspecialchars($patient['first_name'].' '.$patient['last_name']); ?> (ID: <?php echo (int)$patient['patient_id']; ?>)</p>
-        <?php endif; ?>
+        <div class="dashboard-grid">
+            <!-- Patient Information Card -->
+            <?php if ($patient): ?>
+            <div class="dashboard-card">
+                <h3>Patient Information</h3>
+                <div class="table-card-row">
+                    <div class="table-card-label">Name:</div>
+                    <div class="table-card-value"><?php echo htmlspecialchars($patient['first_name'].' '.$patient['last_name']); ?></div>
+                </div>
+                <div class="table-card-row">
+                    <div class="table-card-label">Patient ID:</div>
+                    <div class="table-card-value"><?php echo (int)$patient['patient_id']; ?></div>
+                </div>
+                <div class="table-card-row">
+                    <div class="table-card-label">Date of Birth:</div>
+                    <div class="table-card-value"><?php echo htmlspecialchars($patient['date_of_birth']); ?></div>
+                </div>
+            </div>
+            <?php endif; ?>
 
-        <form method="POST">
-            <input type="hidden" name="patient_id" value="<?php echo (int)$patient_id; ?>">
-            <div class="form-row">
-                <label>Date:</label>
-                <input type="date" name="visit_date" required>
+            <!-- Visit Form Card -->
+            <div class="dashboard-card">
+                <h3>Visit Details</h3>
+                <form method="POST">
+                    <input type="hidden" name="patient_id" value="<?php echo (int)$patient_id; ?>">
+                    
+                    <div class="form-row">
+                        <label for="visit_date">Visit Date:</label>
+                        <input type="date" id="visit_date" name="visit_date" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <label for="visit_reason">Reason for Visit:</label>
+                        <input type="text" id="visit_reason" name="visit_reason" required placeholder="e.g., Annual checkup, symptoms">
+                    </div>
+                    
+                    <div class="form-row">
+                        <label for="diagnosis">Diagnosis:</label>
+                        <input type="text" id="diagnosis" name="diagnosis" placeholder="Enter diagnosis if available">
+                    </div>
+                    
+                    <button type="submit">Save Visit</button>
+                </form>
             </div>
-            <div class="form-row">
-                <label>Reason:</label>
-                <input type="text" name="visit_reason" required>
+
+            <!-- Navigation card -->
+            <div class="dashboard-card">
+                <h3>Navigation</h3>
+                <p>Return to the patient dashboard</p>
+                <a href="view_patient.php">
+                    <button style="background: var(--secondary-color);">Back to Dashboard</button>
+                </a>
             </div>
-            <div class="form-row">
-                <label>Diagnosis:</label>
-                <input type="text" name="diagnosis">
-            </div>
-            <button type="submit">Save Visit</button>
-            <a href="view_patient.php" style="margin-left:10px;">Back</a>
-        </form>
+        </div>
     </div>
 </body>
 </html>

@@ -1,0 +1,1 @@
+// kind of changed generate report for patient to instead be downloaddata.php which is more like a 'view data' actually.. 

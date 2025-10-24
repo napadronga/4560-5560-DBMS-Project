@@ -22,43 +22,85 @@ $visits = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>View Data</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visit Data</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="records-container">
-        <h1>Your Recent Visits</h1>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>Your Visit History</h1>
+        </div>
+
         <?php if ($visits->num_rows === 0): ?>
-            <p>no visit data available yet</p>
+            <div class="dashboard-card">
+                <h3>No Visit Data</h3>
+                <p>You don't have any visit records yet.</p>
+            </div>
         <?php else: ?>
-            <table>
-                <tr>
-                    <th>Date</th>
-                    <th>Reason</th>
-                    <th>Diagnosis</th>
-                    <th>BP</th>
-                    <th>HR</th>
-                    <th>Temp</th>
-                    <th>Notes</th>
-                </tr>
+            <div class="table-cards">
                 <?php while ($v = $visits->fetch_assoc()): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($v['visit_date']); ?></td>
-                        <td><?php echo htmlspecialchars($v['visit_reason'] ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($v['diagnosis'] ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($v['blood_pressure'] ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($v['heart_rate'] ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($v['temperature'] ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($v['extra_notes'] ?? ''); ?></td>
-                    </tr>
+                    <div class="table-card">
+                    <div class="table-card">
+                    <div class="table-card-header">
+                        Visit on <?php echo htmlspecialchars($v['visit_date']); ?>
+                    </div>
+
+                    <div class="sub-card">
+                        <h4>Reason for Visit</h4>
+                        <p><?php echo htmlspecialchars($v['visit_reason'] ?? 'Not specified'); ?></p>
+                    </div>
+
+                    <?php if (!empty($v['diagnosis'])): ?>
+                    <div class="sub-card">
+                        <h4>Diagnosis</h4>
+                        <p><?php echo htmlspecialchars($v['diagnosis']); ?></p>
+                    </div>
+                    <?php endif; ?>
+                        
+                        <h4>Vitals</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin: 1rem 0; padding: 1rem; background: rgba(37, 99, 235, 0.05); border-radius: 8px;">
+                            <div>
+                                <div class="table-card-label">Blood Pressure</div>
+                                <div class="table-card-value" style="font-weight: 600;"><?php echo htmlspecialchars($v['blood_pressure'] ?? 'N/A'); ?></div>
+                            </div>
+                            <div>
+                                <div class="table-card-label">Heart Rate</div>
+                                <div class="table-card-value" style="font-weight: 600;"><?php echo htmlspecialchars($v['heart_rate'] ?? 'N/A'); ?> bpm</div>
+                            </div>
+                            <div>
+                                <div class="table-card-label">Temperature</div>
+                                <div class="table-card-value" style="font-weight: 600;"><?php echo htmlspecialchars($v['temperature'] ?? 'N/A'); ?>°C</div>
+                            </div>
+                        </div>
+                        
+                        <?php if (!empty($v['extra_notes'])): ?>
+                        <div class="sub-card">
+                        <h4>Notes</h4>
+                        <p><?php echo htmlspecialchars($v['extra_notes']); ?></p>
+                        </div>
+                        <?php endif; ?>
+
+                        <?php if (!empty($v['new_medicines'])): ?>
+                        <div class="sub-card">
+                        <h4>New Medications</h4>
+                        <p><?php echo htmlspecialchars($v['new_medicines']); ?></p>
+                        </div>
+                        <?php endif; ?> 
+                    </div>
                 <?php endwhile; ?>
-            </table>
+            </div>
         <?php endif; ?>
 
-        <br>
+        <div class="dashboard-card" style="text-align: center; margin-top: 2rem;">
         <a href="view_records.php">Back</a>
+        </div>
     </div>
 </body>
 </html>

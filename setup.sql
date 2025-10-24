@@ -90,14 +90,17 @@ CREATE TABLE PATIENT_USERS (
     login_email VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    is_suspended BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (patient_id) REFERENCES PATIENT_INFO(patient_id)
 );
 
+-- Doctors table
 CREATE TABLE DOCTOR_USERS (
     doctor_id INT PRIMARY KEY,
     login_email VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    is_suspended BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (doctor_id) REFERENCES DOCTOR_INFO(doctor_id)
 );
 
@@ -126,7 +129,7 @@ VALUES
 (1, NULL, NULL, NULL, NULL, 'non-smoker, occasional alcohol', 'Moderate', 'None', NULL, NULL, NOW()),
 (2, 'Diabetes', NULL, 'Heart disease', NULL, ' heavy alcohol use', 'Active', NULL, 'Fractured collarbone (2016)', NULL, NOW());
 
--- sample doctor, logins
+-- sample doctor logins
 INSERT INTO DOCTOR_INFO (first_name, last_name, contact_email, patients_handled_this_year, upcoming_patients)
 VALUES
 ('Dr. Guadalupe', 'Daniels', 'g@hospital.com', 120, 10);
@@ -143,18 +146,110 @@ VALUES
 (1, 1, 1, '2025-06-10', 160.0, 100.5, '120/80', 72, '2026-02-15', 37.2, 'Tylenol', 16, 'None', 'Worsening', 'Normal', 'Normal', 'No', 'Patient is not sleeping well'),
 (2, 2, 1, '2025-07-10', 180.0, 140.0, '130/85', 78, '2026-03-20', 36.9, 'Lisinopril', 18, 'None', 'Normal', 'Normal', 'Normal', 'No', 'Patient is losing weight');
 
+-- sample users
 INSERT INTO PATIENT_USERS (patient_id, login_email, password_hash)
 VALUES
-('1', 'jon1@gmail.com', 'jon1'),
-('2', 'jon2@gmail.com', 'jon2'),
-('3', 'jon3@gmail.com', 'jon3');
+(1, 'nat@example.com', '$2y$10$R5PT5z/dx4ZcjXhpnU18q.KleKbhHcqlwsuRvNUMaaQdmmD7/pecO'), -- boogers
+(2, 'bob@example.com', '$2y$10$cTIVwBRrIRZF5tJ3tRqqn.sS0iZ6NUNMdoE4Wieh9ziAP/LKjw62a'), -- stars  
+(3, 'rodgerdodger@example.com', '$2y$10$SzKBFOhKIo9kJPwYmejhSe14tmp3H3Ab2Cw4CisHAwnr0G7M34VIi'); -- jonjonjon
 
+-- sample doctors
 INSERT INTO DOCTOR_USERS (doctor_id, login_email, password_hash)
 VALUES
-('1', 'djon1@gmail.com', 'djon1');
+(1, 'g@hospital.com', '$2y$10$eXWnh0znAG0i7xSQrxR0kuvEbYUwZlnygTMF.IxiOnayRJ.RkU0XO'); -- doctor123
 
 -- sample medication data
 INSERT INTO PATIENT_MEDICATIONS (patient_id, medication_name, start_date, dosage)
 VALUES
 (1, 'Tylenol', '2025-01-01', '500mg daily'),
 (2, 'Lisinopril', '2023-12-25', '10mg daily');
+
+-- PROCEDURES table for procedure prices
+CREATE TABLE PROCEDURES (
+    procedure_id INT AUTO_INCREMENT PRIMARY KEY,
+    procedure_name VARCHAR(100) NOT NULL,
+    description TEXT,
+    base_price DECIMAL(10,2) NOT NULL
+);
+
+-- BILLING table
+CREATE TABLE BILLING (
+    bill_id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    doctor_id INT NOT NULL,
+    visit_id INT,
+    procedure_id INT NOT NULL,
+    charge_amount DECIMAL(10,2) NOT NULL,
+    bill_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('Unpaid', 'Paid', 'Pending Insurance') DEFAULT 'Unpaid',
+    FOREIGN KEY (patient_id) REFERENCES PATIENT_INFO(patient_id),
+    FOREIGN KEY (doctor_id) REFERENCES DOCTOR_INFO(doctor_id),
+    FOREIGN KEY (visit_id) REFERENCES HOSPITAL_VISITS(visit_id),
+    FOREIGN KEY (procedure_id) REFERENCES PROCEDURES(procedure_id)
+);
+
+-- PAYMENTS table for storing payment records
+CREATE TABLE PAYMENTS (
+    payment_id INT AUTO_INCREMENT PRIMARY KEY,
+    bill_id INT NOT NULL,
+    patient_id INT NOT NULL,
+    payment_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    amount_paid DECIMAL(10,2) NOT NULL,
+    method ENUM('Credit Card', 'Cash', 'Insurance', 'Other') DEFAULT 'Other',
+    FOREIGN KEY (bill_id) REFERENCES BILLING(bill_id),
+    FOREIGN KEY (patient_id) REFERENCES PATIENT_INFO(patient_id)
+);
+
+-- sample procedures
+INSERT INTO PROCEDURES (procedure_name, description, base_price)
+VALUES
+('Consultation', 'General doctor consultation', 100.00),
+('Blood Test', 'Basic blood panel', 50.00);
+
+INSERT INTO BILLING (patient_id, doctor_id, visit_id, procedure_id, charge_amount, status)
+VALUES
+-- nat sample -consultation
+(1, 1, 1, 1, 100.00, 'Unpaid'),
+
+-- bob sample -blood test and consultation
+(2, 1, 2, 1, 100.00, 'Paid'),
+(2, 1, 2, 2, 50.00, 'Paid');
+
+-- sample payment records
+INSERT INTO PAYMENTS (bill_id, patient_id, amount_paid, method)
+VALUES
+(2, 2, 100.00, 'Cash'),
+(3, 2, 50.00, 'Insurance');
+
+-- ADMIN_USERS table for system admins
+CREATE TABLE ADMIN_USERS (
+    admin_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    last_login TIMESTAMP NULL,
+    is_active BOOLEAN DEFAULT TRUE
+);
+
+-- ACTIVITY_LOG table for tracking activities
+CREATE TABLE ACTIVITY_LOG (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    user_role ENUM('patient', 'doctor', 'admin') NOT NULL,
+    action_type VARCHAR(100) NOT NULL,
+    action_description TEXT NOT NULL,
+    table_affected VARCHAR(50),
+    record_id INT,
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    INDEX idx_user_id (user_id),
+    INDEX idx_timestamp (timestamp),
+    INDEX idx_action_type (action_type)
+);
+
+-- sample admin data
+INSERT INTO ADMIN_USERS (username, password_hash, email, full_name)
+VALUES ('hcadmin', '$2y$12$z0Sr9dwXFkE7XP4D7ptllOQNdEn8ST6fQypeGDjxUNOqImAuGOlnm', 'admin@healthcare.com', 'Healthcare Administrator'); -- password is 'changeme'
