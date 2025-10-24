@@ -1,6 +1,7 @@
 <?php
 include '../includes/auth.php';
 include '../includes/db.php';
+include '../includes/activity_logger.php';
 
 // ensure doctor role
 if ($_SESSION['role'] != 'doctor') {
@@ -25,6 +26,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $conn->prepare("INSERT INTO HOSPITAL_VISITS (patient_id, doctor_id, visit_date, visit_reason, diagnosis) VALUES (?, ?, ?, ?, ?)");
         $stmt->bind_param("iisss", $patient_id, $doctor_id, $visit_date, $visit_reason, $diagnosis);
         if ($stmt->execute()) {
+            $visit_id = $conn->insert_id;
+            //logging action
+            logRecordCreate($conn, $doctor_id, 'doctor', 'HOSPITAL_VISITS', $visit_id, "Created new visit for patient ID: $patient_id - Reason: $visit_reason");
             $success = 'visit added successfully';
         } else {
             $error = 'failed to add visit';

@@ -2,6 +2,7 @@
 // include auth and db
 include '../includes/auth.php';
 include '../includes/db.php';
+include '../includes/activity_logger.php';
 
 // get patient id from session
 $patient_id = $_SESSION['user_id'];
@@ -34,6 +35,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $ts = $conn->prepare("UPDATE PREEXISTING_MEDICAL_HISTORY SET last_time_updated = NOW() WHERE patient_id = ?");
             $ts->bind_param("i", $patient_id);
             $ts->execute();
+            // log medication removal
+            logRecordDelete($conn, $patient_id, 'patient', 'PATIENT_MEDICATIONS', $remove_id, "Patient removed medication ID: $remove_id");
         } else {
             $error = "Failed to remove medication.";
         }
@@ -61,6 +64,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($ok1 && $ok2) {
                 $success = 'information updated successfully';
+                // log email update
+                if ($ok1) {
+                    logRecordEdit($conn, $patient_id, 'patient', 'PATIENT_INFO', $patient_id, "Patient updated their contact email");
+                }
+                // log medication addition
+                if ($ok2 && !empty($new_medication)) {
+                    $med_id = $conn->insert_id;
+                    logRecordCreate($conn, $patient_id, 'patient', 'PATIENT_MEDICATIONS', $med_id, "Patient added medication: $new_medication");
+                }
                 // ensure a history row exists and update timestamp
                 $exists = $conn->prepare("SELECT history_id FROM PREEXISTING_MEDICAL_HISTORY WHERE patient_id = ?");
                 $exists->bind_param("i", $patient_id);

@@ -4,6 +4,7 @@ session_start();
 
 //include the database connection
 include 'includes/db.php';
+include 'includes/activity_logger.php';
 
 //error messages stored here
 $error = "";
@@ -15,12 +16,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
 
     //querying if the email exists in the patient table
-    $sql_patient = "SELECT patient_id, password_hash FROM PATIENT_USERS WHERE login_email='$email'";
+    $sql_patient = "SELECT patient_id, password_hash, is_suspended FROM PATIENT_USERS WHERE login_email='$email'";
     $result_patient = $conn->query($sql_patient);
 
     //querying if the email exists in the doctor table
-    $sql_doctor = "SELECT doctor_id, password_hash FROM DOCTOR_USERS WHERE login_email='$email'";
+    $sql_doctor = "SELECT doctor_id, password_hash, is_suspended FROM DOCTOR_USERS WHERE login_email='$email'";
     $result_doctor = $conn->query($sql_doctor);
+
+    //querying if the email exists in the admin table
+    $sql_admin = "SELECT admin_id, password_hash FROM ADMIN_USERS WHERE email='$email' AND is_active=1";
+    $result_admin = $conn->query($sql_admin);
 
     //if user is in the patient table
     if ($result_patient->num_rows > 0) {
@@ -29,13 +34,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	
 	    //verify password
 	    if (password_verify($password, $patientHash)) {
-            //storing patient id and role in session
-            $_SESSION['user_id'] = $row['patient_id'];
-            $_SESSION['role'] = "patient";
+            //check if account is suspended
+            if ($row['is_suspended']) {
+                $error = "Your account has been suspended. Please contact an administrator.";
+            } else {
+                //storing patient id and role in session
+                $_SESSION['user_id'] = $row['patient_id'];
+                $_SESSION['role'] = "patient";
 
-            //redirecting to user's dash
-            header("Location: dashboard.php");
-            exit();
+                //log the login activity
+                logLogin($conn, $row['patient_id'], 'patient');
+
+                //redirecting to user's dash
+                header("Location: dashboard.php");
+                exit();
+            }
         }
     } 
     //if user is in the doctor table
@@ -45,16 +58,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 	    //verify password
 	    if (password_verify($password, $doctorHash)) {
-            //storing doctor id and role in session
-            $_SESSION['user_id'] = $row['doctor_id'];
-            $_SESSION['role'] = "doctor";
+            //check if account is suspended
+            if ($row['is_suspended']) {
+                $error = "Your account has been suspended. Please contact an administrator.";
+            } else {
+                //storing doctor id and role in session
+                $_SESSION['user_id'] = $row['doctor_id'];
+                $_SESSION['role'] = "doctor";
 
-            //redirecting to the user's dash
-            header("Location: dashboard.php");
+                //log the login activity
+                logLogin($conn, $row['doctor_id'], 'doctor');
+
+                //redirecting to the user's dash
+                header("Location: dashboard.php");
+                exit();
+            }
+        }
+    } 
+    //if user is in the admin table
+    elseif ($result_admin->num_rows > 0) {
+        $row = $result_admin->fetch_assoc();
+	    $adminHash = $row['password_hash'];
+
+	    //verify password
+	    if (password_verify($password, $adminHash)) {
+            //storing admin id and role in session
+            $_SESSION['user_id'] = $row['admin_id'];
+            $_SESSION['role'] = "admin";
+
+            //update last login
+            $update_login = "UPDATE ADMIN_USERS SET last_login = NOW() WHERE admin_id = " . $row['admin_id'];
+            $conn->query($update_login);
+
+            //log the login activity
+            logLogin($conn, $row['admin_id'], 'admin');
+
+            //redirecting to admin dashboard
+            header("Location: admin/dashboard.php");
             exit();
         }
     } 
-    //if no match was found in patient OR doctor
+    //if no match was found in patient, doctor, OR admin
     $error = "Invalid login";
 }
 ?>

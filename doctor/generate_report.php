@@ -1,6 +1,7 @@
 <?php
 include '../includes/auth.php';
 include '../includes/db.php';
+include '../includes/activity_logger.php';
 
 // ensure doctor role
 if ($_SESSION['role'] != 'doctor') {
@@ -11,6 +12,10 @@ $patient_id = isset($_GET['patient_id']) ? (int)$_GET['patient_id'] : 0;
 if (!$patient_id) {
     die('no patient selected');
 }
+
+//log report generation
+$doctor_id = $_SESSION['user_id'];
+logUserAction($conn, $doctor_id, 'doctor', 'REPORT_GENERATE', "Doctor generated report for patient ID: $patient_id");
 
 // basic patient info
 $pstmt = $conn->prepare("SELECT * FROM PATIENT_INFO WHERE patient_id = ?");

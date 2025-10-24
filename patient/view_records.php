@@ -2,9 +2,13 @@
 //include auth/session check and database connection
 include '../includes/auth.php';
 include '../includes/db.php';
+include '../includes/activity_logger.php';
 
 //get patient's id from the session
 $patient_id = $_SESSION['user_id'];
+
+//log patient viewing their records
+logUserAction($conn, $patient_id, 'patient', 'RECORD_VIEW', 'Patient viewed their medical records');
 
 //retrieve basic patient info
 $sql = "SELECT * FROM PATIENT_INFO WHERE patient_id='$patient_id'";

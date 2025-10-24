@@ -8,6 +8,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 }
 
 include '../includes/db.php';
+include '../includes/activity_logger.php';
 
 //handling admin actions
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -25,9 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $conn->query($sql);
         
         //logging action
-        $log_sql = "INSERT INTO ACTIVITY_LOG (user_id, user_role, action_type, action_description, ip_address) 
-                    VALUES ({$_SESSION['user_id']}, 'admin', 'USER_SUSPEND', 'Suspended $user_role user ID: $user_id', '{$_SERVER['REMOTE_ADDR']}')";
-        $conn->query($log_sql);
+        logUserAction($conn, $_SESSION['user_id'], 'admin', 'USER_SUSPEND', "Suspended $user_role user ID: $user_id");
         
     //if account is reactivated, remove flag
     } elseif ($action === 'activate') {
@@ -39,9 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $conn->query($sql);
         
         //logging the action
-        $log_sql = "INSERT INTO ACTIVITY_LOG (user_id, user_role, action_type, action_description, ip_address) 
-                    VALUES ({$_SESSION['user_id']}, 'admin', 'USER_ACTIVATE', 'Activated $user_role user ID: $user_id', '{$_SERVER['REMOTE_ADDR']}')";
-        $conn->query($log_sql);
+        logUserAction($conn, $_SESSION['user_id'], 'admin', 'USER_ACTIVATE', "Activated $user_role user ID: $user_id");
 
     //user deletion
     } elseif ($action === 'delete') {
@@ -63,9 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $conn->query($sql);
         }
         //logging the action
-        $log_sql = "INSERT INTO ACTIVITY_LOG (user_id, user_role, action_type, action_description, ip_address) 
-                    VALUES ({$_SESSION['user_id']}, 'admin', 'USER_DELETE', 'Deleted $user_role user ID: $user_id', '{$_SERVER['REMOTE_ADDR']}')";
-        $conn->query($log_sql);
+        logUserAction($conn, $_SESSION['user_id'], 'admin', 'USER_DELETE', "Deleted $user_role user ID: $user_id");
     //if adding user
     } elseif ($action === 'add_user') {
         $user_role = $_POST['user_role'];
@@ -100,9 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         
         //logging the action
-        $log_sql = "INSERT INTO ACTIVITY_LOG (user_id, user_role, action_type, action_description, ip_address) 
-                    VALUES ({$_SESSION['user_id']}, 'admin', 'USER_CREATE', 'Created new $user_role user: $first_name $last_name', '{$_SERVER['REMOTE_ADDR']}')";
-        $conn->query($log_sql);
+        logUserAction($conn, $_SESSION['user_id'], 'admin', 'USER_CREATE', "Created new $user_role user: $first_name $last_name");
     }
     
     header("Location: users.php");

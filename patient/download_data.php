@@ -2,8 +2,12 @@
 // include auth and db
 include '../includes/auth.php';
 include '../includes/db.php';
+include '../includes/activity_logger.php';
 
 $patient_id = $_SESSION['user_id'];
+
+//log patient downloading their data
+logUserAction($conn, $patient_id, 'patient', 'DATA_DOWNLOAD', 'Patient downloaded their visit data');
 
 // fetch recent hospital visits joined with returned visit data
 $stmt = $conn->prepare(

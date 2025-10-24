@@ -1,6 +1,7 @@
 <?php
 include '../includes/auth.php';
 include '../includes/db.php';
+include '../includes/activity_logger.php';
 
 //makes sure only users with the doctor role can view page
 if ($_SESSION['role'] != 'doctor') {
@@ -9,6 +10,10 @@ if ($_SESSION['role'] != 'doctor') {
 
 //retrieves value of the search parameter
 $search = $_GET['search'] ?? '';
+
+//log doctor viewing patient search
+$doctor_id = $_SESSION['user_id'];
+logUserAction($conn, $doctor_id, 'doctor', 'PATIENT_SEARCH', "Doctor searched for patients with query: '$search'");
 
 //prepares query for patients through either first name, last name, dob, or email
 //uses 'LIKE' for similar matches and limits to 10 results, for now
