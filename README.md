@@ -27,6 +27,8 @@ Server: Apache
 
 1. Install XAMPP
 2. Place project files in the web root (C:\xampp\htdocs\healthcare)
-3. Import the 'setup.sql' database in phpMyAdmin
+3. Insert your password in db_config.php
 4. Start Apache and MySQL in the XAMPP Control Panel
-5. Go to https://localhost/healthcare/ to launch
+5. Import the 'setup.sql' database in phpMyAdmin
+6. Go to http://localhost/healthcare/ to launch
+
