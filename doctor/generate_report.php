@@ -68,6 +68,7 @@ $medications = $mstmt->get_result();
         <?php if (!$patient): ?>
             <div class="dashboard-card">
                 <h3>Patient Not Found</h3>
+                <p>The requested patient record could not be found.</p>
             </div>
         <?php else: ?>
             <div class="dashboard-grid">
