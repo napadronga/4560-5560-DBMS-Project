@@ -7,16 +7,15 @@ CREATE TABLE PATIENT_INFO (
     patient_id INT AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
-    date_of_birth DATE,
-    gender VARCHAR(20),
-    phone_number VARCHAR(20),
-    contact_email VARCHAR(100) UNIQUE,
-    address VARCHAR(200),
-    emergency_contact_name VARCHAR(100),
-    emergency_contact_number VARCHAR(20),
+    date_of_birth DATE NOT NULL,
+    gender VARCHAR(20) NOT NULL,
+    phone_number VARCHAR(20) NOT NULL,
+    contact_email VARCHAR(100) UNIQUE NOT NULL,
+    address VARCHAR(200) NOT NULL,
+    emergency_contact_name VARCHAR(100) NOT NULL,
+    emergency_contact_number VARCHAR(20) NOT NULL,
     marital_status ENUM('Single', 'Married', 'Divorced', 'Widowed','Seperated'),
-    ethnicity VARCHAR(50)
-    #CONSTRAINT quick_contact CHECK (phone_number IS NOT NULL OR contact_email IS NOT NULL)
+    ethnicity VARCHAR(50) NOT NULL
 );
 
 -- Preexisting Medical History table
@@ -41,9 +40,9 @@ CREATE TABLE DOCTOR_INFO (
     doctor_id INT AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
-    contact_email VARCHAR(100) UNIQUE,
-    patients_handled_this_year INT,
-    upcoming_patients INT
+    contact_email VARCHAR(100) UNIQUE NOT NULL,
+    patients_handled_this_year INT DEFAULT 0,
+    upcoming_patients INT DEFAULT 0
 );
 
 -- Hospital Visits table
@@ -117,7 +116,7 @@ INSERT INTO PATIENT_INFO (first_name, last_name, date_of_birth, gender, phone_nu
 VALUES
 ('nat', 'pg', '1973-06-01', 'Female', '111-1111', 'nat@example.com', '1 Commerce Street', 'Bob null', '222-222', 'Single', 'Hispanic'),
 ('Bob', 'null', '1969-08-10', 'Male', '222-2222', 'bob@example.com', '2 Main Street', 'Alice null', '555-6789', 'Married', 'Hispanic'),
-('Rodge', 'Dodger', '1969-08-10', 'Male', NULL, 'rodgerdodger@example.com', '2 Main Street', 'Alice null', '555-6789', 'Married', 'Hispanic');
+('Rodge', 'Dodger', '1969-08-10', 'Male', '555-5555', 'rodgerdodger@example.com', '2 Main Street', 'Alice null', '555-6789', 'Married', 'Hispanic');
 
 -- sample preexisting medical data
 INSERT INTO PREEXISTING_MEDICAL_HISTORY 
@@ -183,6 +182,7 @@ CREATE TABLE BILLING (
     FOREIGN KEY (procedure_id) REFERENCES PROCEDURES(procedure_id)
 );
 
+/*
 -- PAYMENTS table for storing payment records
 CREATE TABLE PAYMENTS (
     payment_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -194,26 +194,27 @@ CREATE TABLE PAYMENTS (
     FOREIGN KEY (bill_id) REFERENCES BILLING(bill_id),
     FOREIGN KEY (patient_id) REFERENCES PATIENT_INFO(patient_id)
 );
+*/
 
 -- sample procedures
 INSERT INTO PROCEDURES (procedure_name, description, base_price)
 VALUES
 ('Consultation', 'General doctor consultation', 100.00),
-('Blood Test', 'Basic blood panel', 50.00),
+('Blood Test', 'Basic blood panel', 50.00);
 
 INSERT INTO BILLING (patient_id, doctor_id, visit_id, procedure_id, charge_amount, status)
 VALUES
-
 -- nat sample (consultation)
 (1, 1, 1, 1, 100.00, 'Unpaid'),
 
 -- bob sample (blood test and consultation)
 (2, 1, 2, 1, 100.00, 'Paid'),
-(2, 1, 2, 2, 50.00, 'Paid'),
+(2, 1, 2, 2, 50.00, 'Paid');
 
+/*
 -- sample payment records
 INSERT INTO PAYMENTS (bill_id, patient_id, amount_paid, method)
 VALUES
 (3, 2, 100.00, 'Cash'),
 (4, 2, 50.00, 'Insurance');
-
+*/
