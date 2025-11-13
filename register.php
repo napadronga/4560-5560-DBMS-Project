@@ -14,39 +14,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
     $first_name = $_POST['first_name'];
     $last_name = $_POST['last_name'];
-    $isDoctor = isset($_POST['is_doctor']);  // isDoctor will be moved to Admin controls, once Admins can manage doctors. This is mainly just for testing
-
-    if ($isDoctor) {
-        if (!empty($email) && !empty($password) && !empty($first_name) && !empty($last_name)) {
-	    $stmt1 = $conn->prepare("INSERT INTO DOCTOR_INFO (first_name, last_name, contact_email) VALUES (?, ?, ?)");
-	    $stmt1->bind_param("sss", $first_name, $last_name, $email);
-	    $stmt1->execute();
-
-	    //get recently auto incremented doctor_id
-	    $doctor_id = $conn->insert_id;
-
-	    //hash the password
-	    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-
-	    //insert into users table
-	    $stmt2 = $conn->prepare("INSERT INTO DOCTOR_USERS (doctor_id, login_email, password_hash) VALUES (?, ?, ?)");
-	    $stmt2->bind_param("iss", $doctor_id, $email, $passwordHash);
-
-	    if ($stmt2->execute()) {
-	        header("Location: index.php");
-		exit();
-	    }
-	    else {
-	        $error = "Invalid login";
-	    }
-	}
-	else {
-	    $error = "Please fill in all the fields.";
-	}
-    }
-
-    else {
-	// Collect additional data for the patient
+    	// Collect additional data for the patient
 	$date_of_birth = $_POST['date_of_birth'];
         $gender = $_POST['gender'];
         $phone_number = $_POST['phone_number'];
@@ -89,7 +57,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         else {
             $error = "Please fill in all the fields.";
         }
-    }
 }
 ?>
 
@@ -172,13 +139,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <label for="contact_email">Contact Email</label>
                     <input type="email" id="contact_email" name="contact_email">
                 </div>
-            </div>
-
-	    <div class="form-row" style="justify-content: center;">
-                <label style="display: flex; align-items: center; cursor: pointer; margin-left: 2rem;">
-                    <input type="checkbox" name="is_doctor" value="1" style="width: auto; margin: 0;">
-                    <span style="position: absolute; left: 120px;">I am a healthcare provider</span>
-                </label>
             </div>
 
             <button type="submit">Create Account</button>
