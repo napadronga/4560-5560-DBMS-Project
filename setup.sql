@@ -223,10 +223,10 @@ VALUES
 -- ADMIN_USERS table for system admins
 CREATE TABLE ADMIN_USERS (
     admin_id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
-    full_name VARCHAR(100) NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     last_login TIMESTAMP NULL,
     is_active BOOLEAN DEFAULT TRUE
@@ -250,5 +250,5 @@ CREATE TABLE ACTIVITY_LOG (
 );
 
 -- sample admin data
-INSERT INTO ADMIN_USERS (username, password_hash, email, full_name)
-VALUES ('hcadmin', '$2y$12$z0Sr9dwXFkE7XP4D7ptllOQNdEn8ST6fQypeGDjxUNOqImAuGOlnm', 'admin@healthcare.com', 'Healthcare Administrator'); -- password is 'changeme'
+INSERT INTO ADMIN_USERS (password_hash, email, first_name, last_name)
+VALUES ('$2y$12$z0Sr9dwXFkE7XP4D7ptllOQNdEn8ST6fQypeGDjxUNOqImAuGOlnm', 'admin@healthcare.com', 'Healthcare', 'Administrator'); -- password is 'changeme'

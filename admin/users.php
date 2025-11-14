@@ -70,16 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $password = $_POST['password'];
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
         
-        if ($user_role === 'patient') {
-            //inserting patients into PATIENT_INFO
-            $sql = "INSERT INTO PATIENT_INFO (first_name, last_name, contact_email) VALUES ('$first_name', '$last_name', '$email')";
-            $conn->query($sql);
-            $patient_id = $conn->insert_id;
-            
-            //then PATIENT_USERS
-            $sql = "INSERT INTO PATIENT_USERS (patient_id, login_email, password_hash) VALUES ($patient_id, '$email', '$password_hash')";
-            $conn->query($sql);
-        } elseif ($user_role === 'doctor') {
+        if ($user_role === 'doctor') {
             //inserting doctors into DOCTOR_INFO
             $sql = "INSERT INTO DOCTOR_INFO (first_name, last_name, contact_email) VALUES ('$first_name', '$last_name', '$email')";
             $conn->query($sql);
@@ -90,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $conn->query($sql);
         } elseif ($user_role === 'admin') {
             //inserting admins into ADMIN_USERS
-            $sql = "INSERT INTO ADMIN_USERS (username, password_hash, email, full_name) VALUES ('$first_name', '$password_hash', '$email', '$first_name $last_name')";
+            $sql = "INSERT INTO ADMIN_USERS (password_hash, email, first_name, last_name) VALUES ('$password_hash', '$email', '$first_name', '$last_name')";
             $conn->query($sql);
         }
         
@@ -134,11 +125,11 @@ while ($row = $result->fetch_assoc()) {
 //getting admins alphabetically, not including oneself
 $current_admin_id = $_SESSION['user_id'];
 $result = $conn->query("
-    SELECT admin_id as user_id, full_name as first_name, '' as last_name, email as contact_email, 
+    SELECT admin_id as user_id, first_name as first_name, last_name as last_name, email as contact_email, 
            created_at, is_active, 'admin' as role
     FROM ADMIN_USERS
     WHERE admin_id != $current_admin_id
-    ORDER BY full_name
+    ORDER BY first_name
 ");
 
 while ($row = $result->fetch_assoc()) {
@@ -360,6 +351,19 @@ while ($row = $result->fetch_assoc()) {
     transform: translateY(17px);
 }
 
+.add-patient {
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+
+    padding: 6px 6px;
+    width:100px;
+    height: 35px;
+    align-self: flex-end;
+}
+
 #user_role {
     transform: translateY(1px);
 }
@@ -387,7 +391,6 @@ while ($row = $result->fetch_assoc()) {
                     <label for="user_role">User Type</label>
                     <select name="user_role" id="user_role" required>
                         <option value="">Select Type</option>
-                        <option value="patient">Patient</option>
                         <option value="doctor">Doctor</option>
                         <option value="admin">Admin</option>
                     </select>
@@ -410,6 +413,9 @@ while ($row = $result->fetch_assoc()) {
                 </div>
                 <button type="submit" class="btn-add">Add User</button>
             </form>
+            <a href="login.php">
+                <button class="add-patient">Add Patient</button>
+            </a>
         </div>
         
         <div class="users-table">
