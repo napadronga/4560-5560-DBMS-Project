@@ -37,25 +37,26 @@ $result = $conn->query($sql);
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="doctor-layout">
+    <?php include '../includes/header.php'; ?>
     <div class="dashboard-container">
         <div class="dashboard-header">
             <h1>Doctor Dashboard</h1>
         </div>
         <!-- search form -->
-        <div class="dashboard-card">
-            <h3>Search Patients</h3>
+        <div class="dashboard-card search-card">
+            <h3>search patients</h3>
             <form method="GET" class="search-form">
                 <div class="search-field">
-                    <label for="search">Search by name or email:</label>
-                    <input type="text" id="search" name="search" placeholder="Enter patient name or email..." value="<?php echo htmlspecialchars($search); ?>">
+                    <label for="search">search by name or email</label>
+                    <input type="text" id="search" name="search" placeholder="enter patient name or email..." value="<?php echo htmlspecialchars($search); ?>">
                 </div>
-   				 <button type="submit">Search</button>
+   				 <button type="submit">search</button>
             </form>
         </div>
 
-        <div class="dashboard-card">
-            <h3>Patient Records</h3>
+        <h3 class="dashboard-subtitle">patient records</h3>
+        <div class="dashboard-section">
             <?php if ($result->num_rows === 0): ?>
                 <p>No patients found.</p>
             <?php else: ?>
@@ -77,24 +78,20 @@ $result = $conn->query($sql);
                                 <div class="table-card-value"><?php echo htmlspecialchars($row['contact_email']); ?></div>
                             </div>
                             
-                            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-                                <form action="add_visit.php" method="get" style="flex: 1;">
+                            <div class="table-card-actions">
+                                <form action="add_visit.php" method="get">
                                     <input type="hidden" name="patient_id" value="<?php echo (int)$row['patient_id']; ?>">
-                                    <button type="submit" style="width: 100%;">Add Visit</button>
+                                    <button type="submit">Add Visit</button>
                                 </form>
-                                <form action="generate_report.php" method="get" style="flex: 1;">
+                                <form action="generate_report.php" method="get">
                                     <input type="hidden" name="patient_id" value="<?php echo (int)$row['patient_id']; ?>">
-                                    <button type="submit" style="width: 100%; background: var(--secondary-color);">Generate Report</button>
+                                    <button type="submit" style="background: var(--secondary-color);">Generate Report</button>
                                 </form>
                             </div>
                         </div>
                     <?php endwhile; ?>
                 </div>
             <?php endif; ?>
-        </div>
-
-        <div class="dashboard-card" style="text-align: center;">
-            <a href="../logout.php" style="color: var(--text-secondary); text-decoration: none;">Sign Out</a>
         </div>
     </div>
 </body>

@@ -88,82 +88,83 @@ $reports['suspended_doctors'] = $result->fetch_assoc()['count'];
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         .admin-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+            max-width: 1100px;
+            margin: 3.5rem auto 2rem;
+            padding: 0 20px 20px;
         }
         
         .admin-header {
-            background: linear-gradient(135deg, #ffffff 0%, #4facfe 100%);
-            color: #333;
-            padding: 30px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background: var(--card);
+            color: var(--text-primary);
+            padding: 24px 24px 22px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
         }
         
         .admin-header h1 {
             margin: 0;
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: 700;
+            color: var(--primary);
         }
         
         .admin-nav {
             display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
+            gap: 12px;
+            margin-bottom: 24px;
             flex-wrap: wrap;
         }
         
         .nav-button {
-            background: #667eea;
+            background: var(--primary);
             color: white;
-            padding: 12px 24px;
+            padding: 10px 18px;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             text-decoration: none;
             font-weight: 500;
-            transition: background 0.2s;
+            transition: background 0.15s ease;
         }
         
         .nav-button:hover {
-            background: #5a6fd8;
+            background: #224764;
         }
         
         .nav-button.secondary {
-            background: #6c757d;
+            background: #6b7280;
         }
         
         .nav-button.danger {
-            background: #dc3545;
+            background: #b91c1c;
         }
         
         .reports-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
+            gap: 16px;
+            margin-bottom: 24px;
         }
         
         .reports-grid-bottom {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
+            gap: 16px;
+            margin-bottom: 24px;
         }
         
         .report-card {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background: var(--surface-color);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
         }
         
         .report-card h3 {
             margin-top: 0;
-            color: #333;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 10px;
+            color: var(--primary-color);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.6);
+            padding-bottom: 8px;
         }
         
         .stat-item {
@@ -212,6 +213,7 @@ $reports['suspended_doctors'] = $result->fetch_assoc()['count'];
     </style>
 </head>
 <body>
+    <?php include '../includes/header.php'; ?>
     <div class="admin-container">
         <div class="admin-header">
             <h1>System Reports</h1>

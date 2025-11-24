@@ -41,6 +41,7 @@ $medications = $medications_result->fetch_all(MYSQLI_ASSOC);
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <?php include '../includes/header.php'; ?>
     <div class="dashboard-container">
         <div class="dashboard-header">
             <h1>Welcome back, <?php echo htmlspecialchars($patient['first_name']); ?>!</h1>
@@ -76,16 +77,16 @@ $medications = $medications_result->fetch_all(MYSQLI_ASSOC);
                 <?php endif; ?>
             </div>
 
-            <!-- Medications Card -->
+            <!-- medications card -->
             <div class="dashboard-card">
                 <h3>Current Medications</h3>
                 <?php if (!empty($medications)): ?>
-                    <ul style="list-style: none; padding: 0;">
+                    <ul class="med-list">
                         <?php foreach ($medications as $med): ?>
-                            <li style="background: rgba(37, 99, 235, 0.05); padding: 0.75rem; margin: 0.5rem 0; border-radius: 8px; border-left: 4px solid var(--primary-color);">
-                                <strong><?php echo htmlspecialchars($med['medication_name']); ?></strong><br>
-                                <small><?php echo htmlspecialchars($med['dosage']); ?></small><br>
-                                <small style="color: var(--text-secondary);">Started: <?php echo htmlspecialchars($med['start_date']); ?></small>
+                            <li class="med-list-item">
+                                <span class="med-list-item-title"><?php echo htmlspecialchars($med['medication_name']); ?></span>
+                                <span class="med-list-item-meta"><?php echo htmlspecialchars($med['dosage']); ?></span>
+                                <span class="med-list-item-meta">started: <?php echo htmlspecialchars($med['start_date']); ?></span>
                             </li>
                         <?php endforeach; ?>
                     </ul>
