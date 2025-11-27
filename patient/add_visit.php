@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>Add Visit – Patient</title>
-    <link rel="stylesheet" href="/healthcare/css/styles.css">
+    <link rel="stylesheet" href="/healthcare/css/styles.css?v=5">
 </head>
 
     <body>
