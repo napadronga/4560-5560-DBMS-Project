@@ -21,7 +21,7 @@
         <a href="login.php">Login</a>
         <a href="register.php">Create Account</a>
       <?php else: ?>
-        <a href="<?= $role==='doctor' ? 'doctor/view_records.php' : 'patient/view_records.php' ?>">Go to Dashboard</a>
+        <a href="<?= $role==='doctor' ? 'doctor/view_patient.php' : 'patient/view_records.php' ?>">Go to Dashboard</a>
       <?php endif; ?>
     </div>
   </div>
