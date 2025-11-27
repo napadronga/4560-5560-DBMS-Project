@@ -3,13 +3,10 @@
 include '../includes/auth.php';
 include '../includes/db.php';
 include '../includes/activity_logger.php';
+require('../fpdf.php');
 
 $patient_id = $_SESSION['user_id'];
 
-//log patient downloading their data
-logUserAction($conn, $patient_id, 'patient', 'DATA_DOWNLOAD', 'Patient downloaded their visit data');
-
-// fetch recent hospital visits joined with returned visit data
 $stmt = $conn->prepare(
     "SELECT hv.visit_date, hv.visit_reason, hv.diagnosis,
             rvd.height, rvd.weight, rvd.blood_pressure, rvd.heart_rate, rvd.temperature,
@@ -23,92 +20,73 @@ $stmt = $conn->prepare(
 $stmt->bind_param("i", $patient_id);
 $stmt->execute();
 $visits = $stmt->get_result();
+
+//log patient downloading their data
+logUserAction($conn, $patient_id, 'patient', 'DATA_DOWNLOAD', 'Patient downloaded their visit data');
+
+$pdf = new FPDF();
+$pdf->AddPage();
+$pdf->SetFont("Arial", "B", 16);
+
+// Title
+$pdf->Cell(0, 10, "Recent Hospital Visit Records", 0, 1, "C");
+$pdf->Ln(5);
+
+// Body font
+$pdf->SetFont("Arial", "", 12);
+
+if ($visits->num_rows === 0) {
+    $pdf->Cell(0, 10, "No visit data found.", 0, 1);
+} else {
+    while ($row = $visits->fetch_assoc()) {
+
+        // Visit Header
+        $pdf->SetFont("Arial", "B", 13);
+        $pdf->Cell(0, 10, "Visit on " . $row['visit_date'], 0, 1);
+        $pdf->SetFont("Arial", "", 12);
+
+        // Visit info
+        $pdf->Cell(0, 8, "Reason: " . $row['visit_reason'], 0, 1);
+        $pdf->MultiCell(0, 8, "Diagnosis: " . $row['diagnosis']);
+
+        $pdf->Ln(2);
+
+        // Measurements
+        $pdf->Cell(0, 8, "Height: " . $row['height'], 0, 1);
+        $pdf->Cell(0, 8, "Weight: " . $row['weight'], 0, 1);
+        $pdf->Cell(0, 8, "Blood Pressure: " . $row['blood_pressure'], 0, 1);
+        $pdf->Cell(0, 8, "Heart Rate: " . $row['heart_rate'], 0, 1);
+        $pdf->Cell(0, 8, "Temperature: " . $row['temperature'], 0, 1);
+        $pdf->Cell(0, 8, "Respiration Rate: " . $row['respiration_rate'], 0, 1);
+
+        $pdf->Ln(2);
+
+        // New meds / diagnoses
+        $pdf->MultiCell(0, 8, "New Medicines: " . $row['new_medicines']);
+        $pdf->MultiCell(0, 8, "New Conditions: " . $row['new_conditions']);
+
+        $pdf->Ln(2);
+
+        // Urgent concerns
+        $pdf->MultiCell(0, 8, "Urgent Concern: " . $row['urgent_concern']);
+
+        // Notes
+        $pdf->MultiCell(0, 8, "Additional Notes: " . $row['extra_notes']);
+
+        // Divider
+        $pdf->Ln(5);
+        $pdf->Cell(0, 0, "", "T"); // horizontal line
+        $pdf->Ln(5);
+
+        // Add new page if space is low
+        if ($pdf->GetY() > 250) {
+            $pdf->AddPage();
+        }
+    }
+}
+
+// Output the PDF
+header("Content-Type: application/pdf");
+header("Content-Disposition: inline; filename='visit_records.pdf'");
+$pdf->Output("I");
 ?>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visit Data</title>
-    <link rel="stylesheet" href="../css/styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-</head>
-<body>
-    <?php include '../includes/header.php'; ?>
-    <div class="dashboard-container">
-        <div class="dashboard-header">
-            <h1>Your Visit History</h1>
-        </div>
-
-        <?php if ($visits->num_rows === 0): ?>
-            <div class="dashboard-card">
-                <h3>No Visit Data</h3>
-                <p>You don't have any visit records yet.</p>
-            </div>
-        <?php else: ?>
-            <div class="table-cards">
-                <?php while ($v = $visits->fetch_assoc()): ?>
-                    <div class="table-card">
-                        <div class="table-card-header">
-                            visit on <?php echo htmlspecialchars($v['visit_date']); ?>
-                        </div>
-
-                        <div class="table-card-row">
-                            <div class="table-card-label">reason for visit</div>
-                            <div class="table-card-value"><?php echo htmlspecialchars($v['visit_reason'] ?? 'not specified'); ?></div>
-                        </div>
-
-                        <?php if (!empty($v['diagnosis'])): ?>
-                            <div class="table-card-row">
-                                <div class="table-card-label">diagnosis</div>
-                                <div class="table-card-value"><?php echo htmlspecialchars($v['diagnosis']); ?></div>
-                            </div>
-                        <?php endif; ?>
-
-                        <div class="table-card-row">
-                            <div class="table-card-label">vitals</div>
-                            <div class="table-card-value">
-                                <div class="vitals-grid">
-                                    <div>
-                                        <span>blood pressure</span>
-                                        <strong><?php echo htmlspecialchars($v['blood_pressure'] ?? 'n/a'); ?></strong>
-                                    </div>
-                                    <div>
-                                        <span>heart rate</span>
-                                        <strong><?php echo htmlspecialchars($v['heart_rate'] ?? 'n/a'); ?> bpm</strong>
-                                    </div>
-                                    <div>
-                                        <span>temperature</span>
-                                        <strong><?php echo htmlspecialchars($v['temperature'] ?? 'n/a'); ?>°c</strong>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <?php if (!empty($v['extra_notes'])): ?>
-                            <div class="table-card-row">
-                                <div class="table-card-label">notes</div>
-                                <div class="table-card-value"><?php echo htmlspecialchars($v['extra_notes']); ?></div>
-                            </div>
-                        <?php endif; ?>
-
-                        <?php if (!empty($v['new_medicines'])): ?>
-                            <div class="table-card-row">
-                                <div class="table-card-label">new medications</div>
-                                <div class="table-card-value"><?php echo htmlspecialchars($v['new_medicines']); ?></div>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                <?php endwhile; ?>
-            </div>
-        <?php endif; ?>
-
-        <div class="dashboard-card" style="text-align: center; margin-top: 2rem;">
-        <a href="view_records.php">Back</a>
-        </div>
-    </div>
-</body>
-</html>
