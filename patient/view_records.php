@@ -75,6 +75,9 @@ $medications = $medications_result->fetch_all(MYSQLI_ASSOC);
                 <?php else: ?>
                     <p>No medical history available. Please update your information.</p>
                 <?php endif; ?>
+                <a href="update_medical_history.php">
+                <button>Update History</button>
+                </a>
             </div>
 
             <!-- medications card -->
@@ -99,13 +102,12 @@ $medications = $medications_result->fetch_all(MYSQLI_ASSOC);
             <div class="dashboard-card">
                 <h3>Quick Actions</h3>
                 <p>Manage your health data and records</p>
-                <form action="download_data.php" method="get" style="margin: 1rem 0;">
-                    <button type="submit">Download My Data</button>
-                </form>
+                <a href="download_data.php" target="_blank" style="margin: 1rem 0;">
+                    <button>Download My Data</button>
+                </a>
                 <a href="../logout.php" style="display: inline-block; margin-top: 1rem; color: var(--text-secondary); text-decoration: none;">Sign Out</a>
             </div>
         </div>
     </div>
 </body>
 </html>
-
