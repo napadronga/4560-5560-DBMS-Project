@@ -70,12 +70,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $extra_notes, $next_checkup_date);
 
             if ($stmt2->execute()) {
-
                 logRecordCreate($conn, $doctor_id, 'doctor', 'returned_visit_data', $stmt2->insert_id,
                     "Added return visit data for visit ID: $visit_id");
 
                 $_SESSION['success'] = "Visit and Return data saved successfully!";
-
+                $del = $conn->prepare("DELETE FROM APPOINTMENTS WHERE doctor_id = ? AND patient_id = ? AND appointment_date = ?");
+                $del->bind_param("iis", $doctor_id, $patient_id, $visit_date);
+                $del->execute();
             } 
             else {
                 $error = "Visit saved, but failed to save return visit data.";
