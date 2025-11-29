@@ -70,16 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $password = $_POST['password'];
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
         
-        if ($user_role === 'patient') {
-            //inserting patients into PATIENT_INFO
-            $sql = "INSERT INTO PATIENT_INFO (first_name, last_name, contact_email) VALUES ('$first_name', '$last_name', '$email')";
-            $conn->query($sql);
-            $patient_id = $conn->insert_id;
-            
-            //then PATIENT_USERS
-            $sql = "INSERT INTO PATIENT_USERS (patient_id, login_email, password_hash) VALUES ($patient_id, '$email', '$password_hash')";
-            $conn->query($sql);
-        } elseif ($user_role === 'doctor') {
+        if ($user_role === 'doctor') {
             //inserting doctors into DOCTOR_INFO
             $sql = "INSERT INTO DOCTOR_INFO (first_name, last_name, contact_email) VALUES ('$first_name', '$last_name', '$email')";
             $conn->query($sql);
@@ -386,7 +377,6 @@ while ($row = $result->fetch_assoc()) {
                     <label for="user_role">User Type</label>
                     <select name="user_role" id="user_role" required>
                         <option value="">Select Type</option>
-                        <option value="patient">Patient</option>
                         <option value="doctor">Doctor</option>
                         <option value="admin">Admin</option>
                     </select>
@@ -408,6 +398,7 @@ while ($row = $result->fetch_assoc()) {
                     <input type="password" name="password" id="password" required>
                 </div>
                 <button type="submit" class="btn-add">Add User</button>
+                <a href="/healthcare/register.php"><button type="button" class="btn-add">Add Patient</button></a>
             </form>
         </div>
         
