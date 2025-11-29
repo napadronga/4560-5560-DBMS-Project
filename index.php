@@ -12,6 +12,12 @@
 <!-- NAV -->
 <?php include 'includes/header.php'; ?>
 
+<?php
+$dashboard_link =
+    ($role === 'doctor') ? '/healthcare/doctor/view_patient.php' :
+    (($role === 'admin') ? '/healthcare/admin/dashboard.php' :
+    '/healthcare/patient/view_records.php');
+?>
 
 <div class="hero-wrap">
   <div class="hero">
@@ -21,7 +27,7 @@
         <a href="login.php">Login</a>
         <a href="register.php">Create Account</a>
       <?php else: ?>
-        <a href="<?= $role==='doctor' ? 'doctor/view_patient.php' : 'patient/view_records.php' ?>">Go to Dashboard</a>
+        <a href="<?= $dashboard_link ?>">Go to Dashboard</a>
       <?php endif; ?>
     </div>
   </div>
@@ -65,8 +71,6 @@
     </div>
   </section>
 
-
-   
   <section class="section">
     <div class="quote">
       "I can find what I need in seconds. The new portal saves us time every day." — Dr. Daniels
@@ -77,7 +81,7 @@
         <a class="btn" href="/healthcare/login.php" style="margin-left:8px;background:#0f3a57;">I already have an account</a>
       <?php else: ?>
         
-        <a class="btn" href="<?= $role==='doctor' ? '/healthcare/doctor/view_patient.php' : '/healthcare/patient/view_records.php' ?>">
+        <a class="btn" href="<?= $dashboard_link ?>">
           Open my dashboard
         </a>
       <?php endif; ?>
