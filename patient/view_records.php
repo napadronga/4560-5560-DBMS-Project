@@ -7,6 +7,16 @@ include '../includes/activity_logger.php';
 //get patient's id from the session
 $patient_id = $_SESSION['user_id'];
 
+$allDoctors = $conn->query("SELECT doctor_id, first_name, last_name FROM DOCTOR_INFO");
+
+// Get appointments and relavent info
+$getAppointments = $conn->prepare("SELECT A.patient_id, A.doctor_id, A.appointment_date, A.appointment_time, D.first_name, D.last_name FROM APPOINTMENTS A 
+                                  JOIN DOCTOR_INFO D ON A.doctor_id = D.doctor_id WHERE A.patient_id = ? AND A.appointment_date >= CURDATE()
+                                  ORDER BY A.appointment_date ASC LIMIT 3");
+$getAppointments->bind_param("i", $patient_id);
+$getAppointments->execute();
+
+$threeAppointments = $getAppointments->get_result()->fetch_all(MYSQLI_ASSOC);
 //log patient viewing their records
 logUserAction($conn, $patient_id, 'patient', 'RECORD_VIEW', 'Patient viewed their medical records');
 
@@ -27,6 +37,27 @@ $med_stmt->execute();
 $medications_result = $med_stmt->get_result();
 $medications = $medications_result->fetch_all(MYSQLI_ASSOC);
 
+// Save appointment
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $date = trim($_POST['date']);
+    $doctor_id = (int)($_POST['doctor_for_appointment']);
+    $time = trim($_POST['time']);
+
+    if (!empty($date) && !empty($doctor_id) && !empty($time)) {
+        $add = $conn->prepare("INSERT INTO APPOINTMENTS (patient_id, doctor_id, appointment_date, appointment_time)
+                              VALUES (?, ?, ?, ?)");
+        $add->bind_param("iiss", $patient_id, $doctor_id, $date, $time);
+        if ($add->execute()) {
+            $_SESSION['success'] = "Appointment saved successfully!";
+            logUserAction($conn, $patient_id, 'patient', 'APPOINTMENT_CREATE', 'Patient created an appointment');
+        }
+        else {
+            $error = "Failed";
+        }
+    }
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -46,6 +77,14 @@ $medications = $medications_result->fetch_all(MYSQLI_ASSOC);
         <div class="dashboard-header">
             <h1>Welcome back, <?php echo htmlspecialchars($patient['first_name']); ?>!</h1>
         </div>
+
+        <?php if (!empty($_SESSION['success'])): ?>
+            <div class='success-message'><?php echo htmlspecialchars($_SESSION['success']) ?></div>
+            <?php unset($_SESSION['success']); 
+        endif; ?>
+        <?php if (!empty($error)): ?>
+            <div class="error-message"><?php echo htmlspecialchars($error); ?></div>
+        <?php endif; ?>
 
         <div class="dashboard-grid">
             <!-- Personal Information Card -->
@@ -106,6 +145,58 @@ $medications = $medications_result->fetch_all(MYSQLI_ASSOC);
                     <button>Download My Data</button>
                 </a>
                 <a href="../logout.php" style="display: inline-block; margin-top: 1rem; color: var(--text-secondary); text-decoration: none;">Sign Out</a>
+            </div>
+
+            <!-- Make Appointment Card -->
+            <div class="dashboard-card">
+                <h3>Make Appointment</h3>
+                <form method="POST">
+                    <div class="form-row">
+                        <label for="date">Date:</label>
+                        <input type="date" id="date" name="date" required>
+                    </div>
+                    <div class="form-row">
+                        <label for="time">Time:</label>
+                        <input type="time" id="time" name="time" required>
+                    </div>
+                    <div class="form-row">
+                        <label for="doctor_for_appointment">Doctor:</label>
+                        <select name="doctor_for_appointment" required>
+                        <option value="">Doctor</option>
+                        <?php
+                        // Fetch each doctors in the database and save them as options
+                        if ($allDoctors->num_rows > 0) {
+                            while ($row = $allDoctors->fetch_assoc()) {
+                            echo '<option value="' . (int)$row['doctor_id'] . '">' . $row["first_name"] . ' ' . $row["last_name"] . '</option>';
+                            }
+                        }
+                        else {
+                            $error = "No valid doctors in database";
+                        }
+                        ?>
+                        </select>
+                    </div>
+                    <button type="submit">Set Appointment</button>
+                </form>
+            </div>
+
+            <!-- See Upcoming Appointment(s) Card -->
+            <div class="dashboard-card">
+                <h3>Upcoming Appointments</h3>
+                <?php if (!empty($threeAppointments)): ?>
+                    <!-- I know this uses med-list css but it looks good with it since appointments only need to show 3 items too -->
+                    <ul class="med-list">
+                        <?php foreach ($threeAppointments as $apps): ?>
+                            <li class="med-row-item">
+                                <span class="med-list-item-title">Doctor: <?php echo htmlspecialchars($apps['first_name'] . ' ' . $apps['last_name']); ?></span>
+                                <span class="med-list-item-meta">Date: <?php echo htmlspecialchars($apps['appointment_date']); ?></span>
+                                <span class="med-list-item-meta">Time: <?php echo htmlspecialchars($apps['appointment_time']); ?></span>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php else: ?>
+                    <p>No Appointments Scheduled</p>
+                <?php endif; ?>
             </div>
         </div>
     </div>

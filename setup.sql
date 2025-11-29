@@ -114,6 +114,16 @@ CREATE TABLE PATIENT_MEDICATIONS (
     FOREIGN KEY (patient_id) REFERENCES PATIENT_INFO(patient_id)
 );
 
+CREATE TABLE APPOINTMENTS (
+	appointment_id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    doctor_id INT NOT NULL,
+    appointment_date DATE,
+    appointment_time TIME,
+    FOREIGN KEY (patient_id) REFERENCES PATIENT_INFO(patient_id),
+    FOREIGN KEY (doctor_id) REFERENCES DOCTOR_INFO(doctor_id)
+);
+
 -- sample patient data
 INSERT INTO PATIENT_INFO (first_name, last_name, date_of_birth, gender, phone_number, contact_email, address, emergency_contact_name, emergency_contact_number, marital_status, ethnicity)
 VALUES
@@ -162,63 +172,6 @@ INSERT INTO PATIENT_MEDICATIONS (patient_id, medication_name, start_date, dosage
 VALUES
 (1, 'Tylenol', '2025-01-01', '500mg daily'),
 (2, 'Lisinopril', '2023-12-25', '10mg daily');
-
--- PROCEDURES table for procedure prices
-CREATE TABLE PROCEDURES (
-    procedure_id INT AUTO_INCREMENT PRIMARY KEY,
-    procedure_name VARCHAR(100) NOT NULL,
-    description TEXT,
-    base_price DECIMAL(10,2) NOT NULL
-);
-
--- BILLING table
-CREATE TABLE BILLING (
-    bill_id INT AUTO_INCREMENT PRIMARY KEY,
-    patient_id INT NOT NULL,
-    doctor_id INT NOT NULL,
-    visit_id INT,
-    procedure_id INT NOT NULL,
-    charge_amount DECIMAL(10,2) NOT NULL,
-    bill_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('Unpaid', 'Paid', 'Pending Insurance') DEFAULT 'Unpaid',
-    FOREIGN KEY (patient_id) REFERENCES PATIENT_INFO(patient_id),
-    FOREIGN KEY (doctor_id) REFERENCES DOCTOR_INFO(doctor_id),
-    FOREIGN KEY (visit_id) REFERENCES HOSPITAL_VISITS(visit_id),
-    FOREIGN KEY (procedure_id) REFERENCES PROCEDURES(procedure_id)
-);
-
--- PAYMENTS table for storing payment records
-CREATE TABLE PAYMENTS (
-    payment_id INT AUTO_INCREMENT PRIMARY KEY,
-    bill_id INT NOT NULL,
-    patient_id INT NOT NULL,
-    payment_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    amount_paid DECIMAL(10,2) NOT NULL,
-    method ENUM('Credit Card', 'Cash', 'Insurance', 'Other') DEFAULT 'Other',
-    FOREIGN KEY (bill_id) REFERENCES BILLING(bill_id),
-    FOREIGN KEY (patient_id) REFERENCES PATIENT_INFO(patient_id)
-);
-
--- sample procedures
-INSERT INTO PROCEDURES (procedure_name, description, base_price)
-VALUES
-('Consultation', 'General doctor consultation', 100.00),
-('Blood Test', 'Basic blood panel', 50.00);
-
-INSERT INTO BILLING (patient_id, doctor_id, visit_id, procedure_id, charge_amount, status)
-VALUES
--- nat sample (consultation)
-(1, 1, 1, 1, 100.00, 'Unpaid'),
-
--- bob sample -blood test and consultation
-(2, 1, 2, 1, 100.00, 'Paid'),
-(2, 1, 2, 2, 50.00, 'Paid');
-
--- sample payment records
-INSERT INTO PAYMENTS (bill_id, patient_id, amount_paid, method)
-VALUES
-(2, 2, 100.00, 'Cash'),
-(3, 2, 50.00, 'Insurance');
 
 -- ADMIN_USERS table for system admins
 CREATE TABLE ADMIN_USERS (
