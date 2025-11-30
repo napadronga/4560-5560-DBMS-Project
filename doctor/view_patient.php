@@ -62,6 +62,16 @@ $result = $conn->query($sql);
             <?php else: ?>
                 <div class="table-cards">
                     <?php while ($row = $result->fetch_assoc()): ?>
+                        <!-- Grab appointments -->
+                         <?php
+                            $pat_id = $row['patient_id'];
+                            $apps = $conn->prepare("SELECT appointment_date, appointment_time FROM APPOINTMENTS 
+                                                    WHERE doctor_id = ? AND patient_id = ? AND appointment_date >= CURDATE() ORDER BY appointment_date LIMIT 1");
+                            $apps->bind_param("ii", $doctor_id, $pat_id);
+                            $apps->execute();
+
+                            $closest_appointment = $apps->get_result()->fetch_assoc();
+                         ?>
                         <div class="table-card">
                             <div class="table-card-header">
                                 <?php echo htmlspecialchars($row['first_name']." ".$row['last_name']); ?>
@@ -77,6 +87,15 @@ $result = $conn->query($sql);
                                 <div class="table-card-label">Email:</div>
                                 <div class="table-card-value"><?php echo htmlspecialchars($row['contact_email']); ?></div>
                             </div>
+
+                            <?php if (!empty($closest_appointment)): ?>
+                                <div class="table-card-row">
+                                    <div class="table-card-label">Upcoming Appointment:</div>
+                                    <div class="table-card-value"><?php echo htmlspecialchars($closest_appointment['appointment_date']) . 
+                                                                  ' / ' . htmlspecialchars($closest_appointment['appointment_time']); ?></div>
+                                </div>
+                            <?php endif; ?>
+
                             
                             <div class="table-card-actions">
                                 <form action="add_visit.php" method="get">
@@ -96,4 +115,3 @@ $result = $conn->query($sql);
     </div>
 </body>
 </html>
-
