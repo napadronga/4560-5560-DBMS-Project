@@ -3,6 +3,9 @@
 include '../includes/auth.php';
 include '../includes/db.php';
 include '../includes/activity_logger.php';
+include '../includes/header.php';
+
+mysqli_report(MYSQLI_REPORT_OFF);  // Cancels the fatal error screen
 
 // get patient id from session
 $patient_id = $_SESSION['user_id'];
@@ -24,76 +27,68 @@ $success = '';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // if user clicked remove
-    if (isset($_POST['remove_med_id'])) {
-        $remove_id = (int)$_POST['remove_med_id'];
+    $error = "";
+
+    if ($_POST['form'] === 'remove_medication') {
+        $remove_id = (int)($_POST['remove_med_id']);
         $del_med = $conn->prepare("DELETE FROM PATIENT_MEDICATIONS WHERE med_id = ? AND patient_id = ?");
         $del_med->bind_param("ii", $remove_id, $patient_id);
         if ($del_med->execute()) {
             $success = "Medication removed successfully.";
-            // also update patient's last_time_updated
-            $ts = $conn->prepare("UPDATE PREEXISTING_MEDICAL_HISTORY SET last_time_updated = NOW() WHERE patient_id = ?");
-            $ts->bind_param("i", $patient_id);
-            $ts->execute();
             // log medication removal
             logRecordDelete($conn, $patient_id, 'patient', 'PATIENT_MEDICATIONS', $remove_id, "Patient removed medication ID: $remove_id");
-        } else {
+
+            $_SESSION['success'] = "Medication removed successfully!";
+        } 
+        else {
             $error = "Failed to remove medication.";
         }
-    } else {
-        // update email and medication logic
-        $new_email = trim($_POST['contact_email'] ?? '');
+    }
+    else if ($_POST['form'] === 'new_medication') {
         $new_medication = trim($_POST['medication_name'] ?? '');
         $new_dosage = trim($_POST['dosage'] ?? '');
+        if (!empty($new_medication)) {
+            $ins_med = $conn->prepare("INSERT INTO PATIENT_MEDICATIONS (patient_id, medication_name, dosage, start_date) VALUES (?, ?, ?, NOW())");
+            $ins_med->bind_param("iss", $patient_id, $new_medication, $new_dosage);
+            $ins_med->execute();
 
-        if (!filter_var($new_email, FILTER_VALIDATE_EMAIL)) {
-            $error = 'invalid email address';
-        } else {
+            // Log new medication
+            $med_id = $conn->insert_id;
+            logRecordCreate($conn, $patient_id, 'patient', 'PATIENT_MEDICATIONS', $med_id, "Patient added medication: $new_medication");
+
+            $_SESSION['success'] = "New medication added successfully!";
+        }
+    }
+    else if ($_POST['form'] === 'update_email') {
+        $new_email = trim($_POST['contact_email'] ?? '');
+
+        $sameEmail = $conn->prepare("SELECT contact_email FROM PATIENT_INFO WHERE contact_email = ?");
+        $sameEmail->bind_param("s", $new_email);
+        $sameEmail->execute();
+        $sameEmail->store_result();
+
+        if (!filter_var($new_email, FILTER_VALIDATE_EMAIL) || $sameEmail->num_rows > 0) {
+            $error = "invalid email address";
+        } 
+        else {
             // update patient email
             $upd_patient = $conn->prepare("UPDATE PATIENT_INFO SET contact_email = ? WHERE patient_id = ?");
             $upd_patient->bind_param("si", $new_email, $patient_id);
-            $ok1 = $upd_patient->execute();
+            $upd_patient->execute();
 
-            // insert new medication if added
-            $ok2 = true;
-            if (!empty($new_medication)) {
-                $ins_med = $conn->prepare("INSERT INTO PATIENT_MEDICATIONS (patient_id, medication_name, dosage, start_date) VALUES (?, ?, ?, NOW())");
-                $ins_med->bind_param("iss", $patient_id, $new_medication, $new_dosage);
-                $ok2 = $ins_med->execute();
-            }
+            // Log contact info change
+            logRecordEdit($conn, $patient_id, 'patient', 'PATIENT_INFO', $patient_id, "Patient updated their contact email");
 
-            if ($ok1 && $ok2) {
-                $success = 'information updated successfully';
-                // log email update
-                if ($ok1) {
-                    logRecordEdit($conn, $patient_id, 'patient', 'PATIENT_INFO', $patient_id, "Patient updated their contact email");
-                }
-                // log medication addition
-                if ($ok2 && !empty($new_medication)) {
-                    $med_id = $conn->insert_id;
-                    logRecordCreate($conn, $patient_id, 'patient', 'PATIENT_MEDICATIONS', $med_id, "Patient added medication: $new_medication");
-                }
-                // ensure a history row exists and update timestamp
-                $exists = $conn->prepare("SELECT history_id FROM PREEXISTING_MEDICAL_HISTORY WHERE patient_id = ?");
-                $exists->bind_param("i", $patient_id);
-                $exists->execute();
-                $exists_res = $exists->get_result();
-                if ($exists_res->num_rows > 0) {
-                    $ts = $conn->prepare("UPDATE PREEXISTING_MEDICAL_HISTORY SET last_time_updated = NOW() WHERE patient_id = ?");
-                    $ts->bind_param("i", $patient_id);
-                    $ts->execute();
-                } else {
-                    $ins_hist = $conn->prepare("INSERT INTO PREEXISTING_MEDICAL_HISTORY (patient_id, last_time_updated) VALUES (?, NOW())");
-                    $ins_hist->bind_param("i", $patient_id);
-                    $ins_hist->execute();
-                }
-            } else {
-                $error = 'failed to update information';
-            }
+            $_SESSION['success'] = "Contact email updated successfully!";
         }
     }
-}
 
+    if (!empty($error)) {
+        $_SESSION['error'] = $error;
+    }
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
 
 ?>
 
@@ -114,18 +109,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <h1>Edit Your Information</h1>
         </div>
 
-        <?php if (!empty($success)): ?>
-            <div class="success-message"><?php echo htmlspecialchars($success); ?></div>
-        <?php endif; ?>
-        <?php if (!empty($error)): ?>
-            <div class="error-message"><?php echo htmlspecialchars($error); ?></div>
-        <?php endif; ?>
+        <?php if (!empty($_SESSION['success'])): ?>
+            <div class='success-message'><?php echo htmlspecialchars($_SESSION['success']) ?></div>
+            <?php unset($_SESSION['success']); 
+        endif; ?>
+        <?php if (!empty($_SESSION['error'])): ?>
+            <div class="error-message"><?php echo htmlspecialchars($_SESSION['error']); ?></div>
+            <?php unset($_SESSION['error']);
+        endif; ?>
 
         <div class="dashboard-grid">
             <!-- Contact Information Card -->
             <div class="dashboard-card">
                 <h3>Contact Information</h3>
                 <form method="POST" id="edit-form">
+                    <input type="hidden" name="form" value="update_email">
                     <div class="form-row">
                         <label for="email">Email Address:</label>
                         <input type="email" id="email" name="contact_email" value="<?php echo htmlspecialchars($patient['contact_email'] ?? ''); ?>" required>
@@ -151,6 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <div class="table-card-value"><?php echo htmlspecialchars($med['start_date']); ?></div>
                                 </div>
                                 <form method="POST" style="margin-top: 1rem;">
+                                    <input type="hidden" name="form" value="remove_medication">
                                     <button type="submit" name="remove_med_id" value="<?php echo (int)$med['med_id']; ?>" 
                                             style="background: var(--error-color); color: white; padding: 0.5rem 1rem; font-size: 0.9rem;">
                                         Remove Medication
@@ -168,6 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="dashboard-card">
                 <h3>Add New Medication</h3>
                 <form method="POST">
+                    <input type="hidden" name="form" value="new_medication">
                     <div class="form-row">
                         <label for="medication_name">Medication Name:</label>
                         <input type="text" id="medication_name" name="medication_name" placeholder="Enter medication name">
@@ -179,18 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <button type="submit">Add Medication</button>
                 </form>
             </div>
-
-            <!-- Navigation Card -->
-            <div class="dashboard-card">
-                <h3>Navigation</h3>
-                <p>Return to your dashboard or sign out</p>
-                <a href="view_records.php" style="display: inline-block; margin: 1rem 0;">
-                    <button style="background: var(--secondary-color);">Back to Dashboard</button>
-                </a>
-                <a href="../logout.php" style="display: inline-block; margin: 1rem 0; color: var(--text-secondary); text-decoration: none;">Sign Out</a>
-            </div>
         </div>
     </div>
 </body>
 </html>
-
