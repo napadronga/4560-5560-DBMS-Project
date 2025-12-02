@@ -98,8 +98,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             exit();
         }
     } 
-    //if no match was found in patient, doctor, OR admin
-    $error = "Invalid login";
+    //if no match was found in patient, doctor, OR admin and no other error was set
+    if (empty($error)) {
+        $error = "Invalid login";
+    }
 }
 ?>
 
