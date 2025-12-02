@@ -22,6 +22,10 @@ Frontend: HTML, CSS
 
 Server: Apache
 
+# Report Link
+
+Overleaf: https://www.overleaf.com/read/gymbzbmmhxgh#dd0f54 
+
 
 # Setup Instructions
 
@@ -31,4 +35,5 @@ Server: Apache
 4. Start Apache and MySQL in the XAMPP Control Panel
 5. Import the 'setup.sql' database in phpMyAdmin
 6. Go to http://localhost/healthcare/ to launch
+
 
